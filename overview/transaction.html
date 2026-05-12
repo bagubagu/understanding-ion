@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>End-to-end transaction · ION Network</title>
-  <meta name="description" content="A worked example: a consumer buys a smartphone on Tokopedia from a Jakarta merchant, fulfilled by JNE — visualised across the Trade and Logistics sectors of the ION Network." />
+  <meta name="description" content="A worked example: a consumer buys a smartphone on Pasar Sapa from a Jakarta merchant, fulfilled by JNE — visualised across the Trade and Logistics sectors of the ION Network." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231E2761'/%3E%3Ctext x='16' y='22' font-family='ui-sans-serif,system-ui' font-size='18' font-weight='700' fill='%23F7F7F4' text-anchor='middle'%3EI%3C/text%3E%3C/svg%3E" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -304,7 +304,7 @@
         </div>
         <div class="actor network">
           <span class="role">BAP · both sectors</span>
-          <span class="name">Tokopedia</span>
+          <span class="name">Pasar Sapa</span>
           <span class="meta">Buyer app</span>
         </div>
         <div class="actor trade">
@@ -330,7 +330,7 @@
         <!-- ===== Sequence diagram ===== -->
         <svg viewBox="0 0 1180 2280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-title t-desc">
           <title id="t-title">End-to-end ION transaction sequence</title>
-          <desc id="t-desc">Sequence diagram across five lanes — Consumer, BAP (Tokopedia), BPP-Trade (Toko Elektronik), BPP-Logistics (JNE), and ION Services — showing catalog discovery, Trade select-init-confirm, payment, Logistics select-init-confirm with linkedContractId, transit status events, delivery, and reconcile.</desc>
+          <desc id="t-desc">Sequence diagram across five lanes — Consumer, BAP (Pasar Sapa), BPP-Trade (Toko Elektronik), BPP-Logistics (JNE), and ION Services — showing catalog discovery, Trade select-init-confirm, payment, Logistics select-init-confirm with linkedContractId, transit status events, delivery, and reconcile.</desc>
 
           <defs>
             <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -365,7 +365,7 @@
             <!-- BAP -->
             <rect x="275" y="20" width="130" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--border)"/>
             <text class="lane-label" x="340" y="40" text-anchor="middle">BAP</text>
-            <text class="lane-sub"   x="340" y="58" text-anchor="middle">Tokopedia</text>
+            <text class="lane-sub"   x="340" y="58" text-anchor="middle">Pasar Sapa</text>
             <text class="lane-sub"   x="340" y="72" text-anchor="middle" font-style="italic">trade + logistics</text>
             <line class="lane-rail" x1="340" y1="80" x2="340" y2="2240"/>
 
@@ -411,7 +411,7 @@
           <!-- Catalog subscription to BAP -->
           <line class="msg-arrow trade" x1="1055" y1="208" x2="345" y2="208" marker-end="url(#ahA)"/>
           <text class="msg-label" x="700" y="202" text-anchor="middle">/on_subscribe → catalogs</text>
-          <text class="msg-sub"   x="700" y="219" text-anchor="middle">Tokopedia keeps a fresh local index</text>
+          <text class="msg-sub"   x="700" y="219" text-anchor="middle">Pasar Sapa keeps a fresh local index</text>
 
           <!-- ============================================================
                PHASE 2 · BROWSE
@@ -421,7 +421,7 @@
           <text class="phase-band-label" x="32" y="258">Phase 2 · Browse</text>
           <line class="msg-arrow trade" x1="100" y1="280" x2="335" y2="280" marker-end="url(#ahA)"/>
           <text class="msg-label" x="217" y="274" text-anchor="middle">search "smartphone"</text>
-          <text class="msg-sub"   x="217" y="292" text-anchor="middle">Andi opens Tokopedia, finds Toko Elektronik</text>
+          <text class="msg-sub"   x="217" y="292" text-anchor="middle">Andi opens Pasar Sapa, finds Toko Elektronik</text>
 
           <!-- ============================================================
                PHASE 3 · TRADE · /select
@@ -501,7 +501,7 @@
 
           <line class="msg-arrow logi" x1="340" y1="920" x2="815" y2="920" marker-end="url(#ahL)"/>
           <text class="msg-label" x="577" y="914" text-anchor="middle">/init</text>
-          <text class="msg-sub"   x="577" y="932" text-anchor="middle">pickup + drop addresses · payment terms (FWA Tokopedia × JNE 2026Q2)</text>
+          <text class="msg-sub"   x="577" y="932" text-anchor="middle">pickup + drop addresses · payment terms (FWA Pasar Sapa × JNE 2026Q2)</text>
 
           <line class="msg-arrow logi" x1="815" y1="960" x2="345" y2="960" marker-end="url(#ahL)"/>
           <text class="msg-label" x="577" y="954" text-anchor="middle">/on_init</text>
@@ -668,7 +668,7 @@
           <span class="num">1</span>
           <span class="tag">Catalog</span>
           <h3>Background discovery</h3>
-          <p>Toko Elektronik publishes its product catalog (with halal status, BPOM refs, return-policy IRIs). JNE publishes rate logic and provincial coverage. Tokopedia subscribes once and keeps the index fresh.</p>
+          <p>Toko Elektronik publishes its product catalog (with halal status, BPOM refs, return-policy IRIs). JNE publishes rate logic and provincial coverage. Pasar Sapa subscribes once and keeps the index fresh.</p>
           <ul><li>/catalog/publish</li><li>/on_subscribe</li><li>policy IRIs</li></ul>
         </article>
 
@@ -676,7 +676,7 @@
           <span class="num">2</span>
           <span class="tag">Browse</span>
           <h3>Andi opens the app</h3>
-          <p>Search runs against Tokopedia's local index — no live network call. Toko Elektronik's listing appears with its declared <code style="font-family:JetBrains Mono,monospace;font-size:12px;">availability.status</code>.</p>
+          <p>Search runs against Pasar Sapa's local index — no live network call. Toko Elektronik's listing appears with its declared <code style="font-family:JetBrains Mono,monospace;font-size:12px;">availability.status</code>.</p>
         </article>
 
         <article class="phase">
@@ -707,7 +707,7 @@
           <span class="num">6</span>
           <span class="tag">Logistics · select</span>
           <h3>Bind a binding rate</h3>
-          <p>Tokopedia (now wearing its Logistics-BAP hat) calls JNE with the actual shipment profile — pickup address, drop pincode, weight, declared value. JNE returns a binding rate with a quote validity window.</p>
+          <p>Pasar Sapa (now wearing its Logistics-BAP hat) calls JNE with the actual shipment profile — pickup address, drop pincode, weight, declared value. JNE returns a binding rate with a quote validity window.</p>
           <ul><li>/select</li><li>/on_select</li><li>quoteValidityWindow</li></ul>
         </article>
 
@@ -715,7 +715,7 @@
           <span class="num">7</span>
           <span class="tag">Logistics · init</span>
           <h3>Apply Framework Agreement</h3>
-          <p>BAP attaches the active <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">logistics-fwa</code> reference (Tokopedia × JNE 2026 Q2). The FWA's commercial envelope — SLA, rebates, dispute terms — supersedes per-offer policies.</p>
+          <p>BAP attaches the active <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">logistics-fwa</code> reference (Pasar Sapa × JNE 2026 Q2). The FWA's commercial envelope — SLA, rebates, dispute terms — supersedes per-offer policies.</p>
           <ul><li>/init</li><li>/on_init</li><li>fwaReference</li></ul>
         </article>
 
@@ -739,7 +739,7 @@
           <span class="num">10</span>
           <span class="tag">Logistics · transit</span>
           <h3>Hub routing + live track</h3>
-          <p>JNE moves the parcel through its Jakarta hub (P2H2P topology). Tokopedia opens a <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">/track</code> session for live GPS, in addition to coarse status pushes.</p>
+          <p>JNE moves the parcel through its Jakarta hub (P2H2P topology). Pasar Sapa opens a <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">/track</code> session for live GPS, in addition to coarse status pushes.</p>
           <ul><li>/track</li><li>/on_track</li><li>IN_TRANSIT</li><li>OUT_FOR_DELIVERY</li></ul>
         </article>
 
@@ -755,7 +755,7 @@
           <span class="num">12</span>
           <span class="tag">Rating</span>
           <h3>Five dimensions, one act</h3>
-          <p>Andi rates once. Tokopedia splits it into Trade ratings (PROVIDER, ITEM) and Logistics ratings (FULFILLMENT_TIMELINESS, PACKAGE_CONDITION, AGENT_BEHAVIOUR).</p>
+          <p>Andi rates once. Pasar Sapa splits it into Trade ratings (PROVIDER, ITEM) and Logistics ratings (FULFILLMENT_TIMELINESS, PACKAGE_CONDITION, AGENT_BEHAVIOUR).</p>
           <ul><li>/rate</li><li>/on_rate</li><li>5 dimensions</li></ul>
         </article>
 
