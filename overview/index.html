@@ -125,6 +125,23 @@
     }
     .chip strong { color: var(--ink); font-weight: 600; }
 
+    .cta-row { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 20px; border-radius: 10px;
+      font-weight: 600; font-size: 14px; text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .cta.primary {
+      background: var(--ink); color: #fff; border: 1px solid var(--ink);
+    }
+    .cta.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(30,39,97,0.25); }
+    .cta.secondary {
+      background: var(--panel); color: var(--ink); border: 1px solid var(--border);
+    }
+    .cta.secondary:hover { background: var(--panel-alt); }
+    .cta .arrow { font-family: "Fraunces", serif; }
+
     /* ===== Diagram card ===== */
     section.diagram {
       padding: 28px 0 24px;
@@ -312,6 +329,7 @@
         <a href="#diagram">Architecture</a>
         <a href="#tiers">Layers</a>
         <a href="#protocol">Protocol</a>
+        <a href="transaction.html">Transaction</a>
       </nav>
     </div>
   </header>
@@ -330,6 +348,10 @@
         <span class="chip"><strong>3</strong> core services</span>
         <span class="chip"><strong>BAP ↔ BPP</strong> interactions</span>
         <span class="chip">Beckn Protocol</span>
+      </div>
+      <div class="cta-row">
+        <a class="cta primary" href="transaction.html">See an end-to-end transaction <span class="arrow">→</span></a>
+        <a class="cta secondary" href="#diagram">Skip to architecture</a>
       </div>
     </section>
 
