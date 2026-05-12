@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ION Network · Architecture</title>
+  <meta name="description" content="A reference architecture for the ION Network — governance, network profile, core services, and Beckn participant interactions." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231E2761'/%3E%3Ctext x='16' y='22' font-family='ui-sans-serif,system-ui' font-size='18' font-weight='700' fill='%23F7F7F4' text-anchor='middle'%3EI%3C/text%3E%3C/svg%3E" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ION Network · Architecture" />
+  <meta property="og:description" content="Governance, network profile, core services, and Beckn participants — at a glance." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #F7F6F1;
+      --bg-soft:   #EFEEE7;
+      --panel:     #FFFFFF;
+      --ink:       #1E2761;
+      --ink-soft:  #3E4B7C;
+      --text:      #1F2230;
+      --text-2:    #5B6075;
+      --muted:     #8A8FA5;
+      --border:    #E2E1D8;
+      --rail:      #B7BBCB;
+      --accent:    #C96442;
+      --accent-2:  #F0E2DC;
+      --panel-alt: #EEF1FA;
+      --shadow:    0 1px 2px rgba(15, 22, 50, 0.04), 0 8px 24px rgba(15, 22, 50, 0.06);
+      --radius:    14px;
+      --radius-sm: 8px;
+      --max:       1240px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0E1024;
+        --bg-soft:   #15183A;
+        --panel:     #1A1E45;
+        --ink:       #E8EBFF;
+        --ink-soft:  #B7BCE0;
+        --text:      #E8EBFF;
+        --text-2:    #A6ABCB;
+        --muted:     #7E84A6;
+        --border:    #272C57;
+        --rail:      #3A4178;
+        --accent:    #E07A57;
+        --accent-2:  #3A2A22;
+        --panel-alt: #232862;
+        --shadow:    0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 28px; }
+
+    /* ===== Top bar ===== */
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: saturate(140%) blur(8px);
+      background: color-mix(in oklab, var(--bg) 80%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink); }
+    .brand-mark {
+      width: 26px; height: 26px; border-radius: 7px; background: var(--ink); color: #fff;
+      display: grid; place-items: center; font-family: "Fraunces", serif; font-weight: 700;
+    }
+    .nav-links { display: flex; gap: 22px; font-size: 14px; color: var(--text-2); }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .nav-links a:hover { color: var(--ink); }
+    @media (max-width: 720px) { .nav-links { display: none; } }
+
+    /* ===== Hero ===== */
+    .hero { padding: 64px 0 24px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 999px;
+      background: var(--accent-2); color: var(--accent);
+      font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 600;
+      font-size: clamp(36px, 5.2vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin: 18px 0 14px;
+    }
+    .lede {
+      font-size: clamp(16px, 1.6vw, 19px);
+      color: var(--text-2);
+      max-width: 720px;
+    }
+    .meta {
+      margin-top: 22px;
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .chip {
+      padding: 6px 12px; border-radius: 999px;
+      background: var(--panel); border: 1px solid var(--border);
+      font-size: 12.5px; color: var(--text-2);
+    }
+    .chip strong { color: var(--ink); font-weight: 600; }
+
+    /* ===== Diagram card ===== */
+    section.diagram {
+      padding: 28px 0 24px;
+    }
+    .diagram-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 18px 8px;
+      overflow: hidden;
+    }
+    .diagram-card svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    /* legend below the diagram */
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 18px;
+      padding: 14px 6px 6px;
+      font-size: 12.5px;
+      color: var(--text-2);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .legend .item { display: inline-flex; align-items: center; gap: 8px; }
+    .legend .swatch { width: 22px; height: 3px; border-radius: 2px; background: var(--rail); }
+    .legend .swatch.accent { background: var(--accent); height: 3px; }
+
+    /* SVG hoverable groups */
+    .node rect.body {
+      transition: filter .18s ease, transform .18s ease;
+      transform-box: fill-box; transform-origin: center;
+    }
+    .node:hover rect.body {
+      filter: drop-shadow(0 6px 14px rgba(30, 39, 97, 0.15));
+    }
+
+    /* ===== Tiers section ===== */
+    section.tiers { padding: 56px 0 24px; }
+    .section-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
+      margin-bottom: 28px;
+    }
+    .section-head h2 {
+      font-family: "Fraunces", Georgia, serif; font-weight: 600;
+      font-size: clamp(26px, 3vw, 34px);
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin: 0;
+    }
+    .section-head .hint { color: var(--muted); font-size: 14px; }
+
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .tier {
+      grid-column: span 12;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 22px 20px;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+    @media (min-width: 760px) {
+      .tier { grid-column: span 6; }
+    }
+    @media (min-width: 1080px) {
+      .tier.span-4 { grid-column: span 4; }
+      .tier.span-6 { grid-column: span 6; }
+      .tier.span-8 { grid-column: span 8; }
+      .tier.span-12 { grid-column: span 12; }
+    }
+    .tier-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--muted); font-weight: 700;
+    }
+    .tier-tag .bar {
+      display: inline-block; width: 18px; height: 2px; background: var(--accent);
+    }
+    .tier h3 {
+      font-family: "Fraunces", Georgia, serif; font-weight: 600;
+      font-size: 22px; letter-spacing: -0.01em; color: var(--ink);
+      margin: 8px 0 8px;
+    }
+    .tier p { color: var(--text-2); margin: 0 0 12px; font-size: 15px; }
+    .tier ul {
+      list-style: none; padding: 0; margin: 8px 0 0;
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .tier ul li {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px; color: var(--ink-soft);
+      padding: 4px 9px; border-radius: 6px;
+      background: var(--panel-alt);
+      border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
+    }
+
+    /* protocol callout */
+    .protocol {
+      margin-top: 18px;
+      background: var(--accent-2);
+      border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+    }
+    .protocol b { color: var(--ink); font-family: "Fraunces", Georgia, serif; font-size: 18px; font-weight: 600; }
+    .protocol .endpoints { display: flex; flex-wrap: wrap; gap: 6px; }
+    .protocol code {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 12.5px; color: var(--accent);
+      background: var(--panel); border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+      padding: 3px 8px; border-radius: 6px;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      margin-top: 72px;
+      padding: 28px 0 48px;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 13px;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    footer a { color: var(--text-2); text-decoration: none; }
+    footer a:hover { color: var(--ink); }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark">I</span>
+        <span>ION Network</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#diagram">Architecture</a>
+        <a href="#tiers">Layers</a>
+        <a href="#protocol">Protocol</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top" class="wrap">
+
+    <section class="hero">
+      <span class="eyebrow"><span class="dot"></span>Reference architecture</span>
+      <h1>An open commerce network, ratified by a council, run on Beckn.</h1>
+      <p class="lede">
+        ION layers governance, a network profile, and three core services on top of the Beckn protocol —
+        connecting buyer apps, providers, and consumers across Indonesian commerce.
+      </p>
+      <div class="meta">
+        <span class="chip"><strong>5</strong> layers</span>
+        <span class="chip"><strong>3</strong> core services</span>
+        <span class="chip"><strong>BAP ↔ BPP</strong> interactions</span>
+        <span class="chip">Beckn Protocol</span>
+      </div>
+    </section>
+
+    <section id="diagram" class="diagram">
+      <div class="diagram-card">
+        <!-- Architecture diagram -->
+        <svg viewBox="0 0 1240 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+          <title id="title">ION Network Architecture</title>
+          <desc id="desc">Five-tier diagram: Council, Network profile, Core services, Participants, Consumer.</desc>
+
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--rail)"/>
+            </marker>
+            <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+            </marker>
+          </defs>
+
+          <style>
+            .tier-label { font: 600 11px "Inter", system-ui; fill: var(--muted); letter-spacing: 1.4px; text-transform: uppercase; }
+            .box-title  { font: 600 17px "Inter", system-ui; fill: var(--ink); }
+            .box-sub    { font: 400 13px "Inter", system-ui; fill: var(--text-2); }
+            .box-detail { font: 400 13px "Inter", system-ui; fill: var(--text); }
+            .edge-label { font: italic 12px "Inter", system-ui; fill: var(--muted); }
+            .edge-label.accent { fill: var(--accent); }
+            .pill        { font: 500 13px "Inter", system-ui; fill: var(--ink); }
+          </style>
+
+          <!-- Tier labels -->
+          <text class="tier-label" x="40" y="60">L1 · Governance</text>
+          <text class="tier-label" x="40" y="220">L2 · Network profile</text>
+          <text class="tier-label" x="40" y="400">L3 · Core services</text>
+          <text class="tier-label" x="40" y="600">L4 · Participants</text>
+          <text class="tier-label" x="40" y="860">L5 · End user</text>
+
+          <!-- L1: ION Council -->
+          <g class="node">
+            <rect class="body" x="490" y="76" width="260" height="78" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <rect x="490" y="76" width="6" height="78" rx="3" fill="var(--accent)"/>
+            <text class="box-title" x="620" y="110" text-anchor="middle">ION Council</text>
+            <text class="box-sub"   x="620" y="132" text-anchor="middle">Governance body</text>
+          </g>
+
+          <!-- ratifies -->
+          <line x1="620" y1="154" x2="620" y2="220" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrowAccent)"/>
+          <text class="edge-label accent" x="632" y="190">ratifies</text>
+
+          <!-- L2: ION Network -->
+          <g class="node">
+            <rect class="body" x="350" y="232" width="540" height="116" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <text class="box-title" x="620" y="262" text-anchor="middle">ION Network</text>
+            <text class="box-sub"   x="620" y="284" text-anchor="middle"><tspan font-style="italic">ion.yaml</tspan> — network profile</text>
+            <line x1="380" y1="298" x2="860" y2="298" stroke="var(--border)"/>
+            <!-- two pills -->
+            <rect x="380" y="310" width="220" height="28" rx="8" fill="var(--panel-alt)" stroke="var(--border)"/>
+            <text class="pill" x="490" y="328" text-anchor="middle">Policy Registry</text>
+            <rect x="640" y="310" width="220" height="28" rx="8" fill="var(--panel-alt)" stroke="var(--border)"/>
+            <text class="pill" x="750" y="328" text-anchor="middle">Error Registry</text>
+          </g>
+
+          <!-- Trunk -->
+          <line x1="620" y1="348" x2="620" y2="380" stroke="var(--rail)" stroke-width="1.5"/>
+          <line x1="180" y1="380" x2="1060" y2="380" stroke="var(--rail)" stroke-width="1.5"/>
+          <line x1="180" y1="380" x2="180" y2="416" stroke="var(--rail)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <line x1="620" y1="380" x2="620" y2="416" stroke="var(--rail)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <line x1="1060" y1="380" x2="1060" y2="416" stroke="var(--rail)" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+          <!-- L3: Services -->
+          <g class="node">
+            <rect class="body" x="60" y="424" width="240" height="92" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <text class="box-title" x="180" y="458" text-anchor="middle">ION Registry</text>
+            <text class="box-sub"   x="180" y="482" text-anchor="middle" font-style="italic">on DeDi</text>
+          </g>
+          <g class="node">
+            <rect class="body" x="500" y="424" width="240" height="92" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <text class="box-title" x="620" y="458" text-anchor="middle">Catalogue Service</text>
+            <text class="box-sub"   x="620" y="482" text-anchor="middle" font-style="italic">Beckn Fabric</text>
+          </g>
+          <g class="node">
+            <rect class="body" x="940" y="424" width="240" height="92" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <text class="box-title" x="1060" y="458" text-anchor="middle">Discover Service</text>
+            <text class="box-sub"   x="1060" y="482" text-anchor="middle" font-style="italic">CDS</text>
+          </g>
+
+          <!-- service edge labels + connectors to participants -->
+          <text class="edge-label" x="180" y="546" text-anchor="middle">registers</text>
+          <text class="edge-label" x="620" y="546" text-anchor="middle">publishes</text>
+          <text class="edge-label" x="1060" y="546" text-anchor="middle">queries · subscribes</text>
+
+          <line x1="180"  y1="552" x2="180"  y2="612" stroke="var(--rail)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <line x1="620"  y1="552" x2="620"  y2="612" stroke="var(--rail)" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <line x1="1060" y1="552" x2="1060" y2="612" stroke="var(--rail)" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+          <!-- L4: Participants -->
+          <g class="node">
+            <rect class="body" x="40" y="620" width="280" height="116" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <rect x="40" y="620" width="6" height="116" rx="3" fill="var(--accent)"/>
+            <text class="box-title" x="180" y="654" text-anchor="middle">BAP</text>
+            <text class="box-sub"   x="180" y="678" text-anchor="middle">Buyer apps</text>
+            <text class="box-detail" x="180" y="704" text-anchor="middle">Tokopedia · Shopee · Lazada</text>
+          </g>
+          <g class="node">
+            <rect class="body" x="480" y="620" width="280" height="116" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <rect x="480" y="620" width="6" height="116" rx="3" fill="var(--accent)"/>
+            <text class="box-title" x="620" y="654" text-anchor="middle">BPP</text>
+            <text class="box-sub"   x="620" y="678" text-anchor="middle">Provider platforms</text>
+            <text class="box-detail" x="620" y="704" text-anchor="middle">Merchants · JNE · J&amp;T · LSPs</text>
+          </g>
+          <g class="node">
+            <rect class="body" x="920" y="620" width="280" height="116" rx="14" fill="var(--panel)" stroke="var(--border)"/>
+            <rect x="920" y="620" width="6" height="116" rx="3" fill="var(--accent)"/>
+            <text class="box-title" x="1060" y="654" text-anchor="middle">BAP</text>
+            <text class="box-sub"   x="1060" y="678" text-anchor="middle">Additional buyer apps</text>
+            <text class="box-detail" x="1060" y="704" text-anchor="middle">Partner storefronts · niche apps</text>
+          </g>
+
+          <!-- BAP <-> BPP arrows -->
+          <line x1="320" y1="668" x2="478" y2="668" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrowAccent)"/>
+          <text class="edge-label accent" x="399" y="660" text-anchor="middle">/select</text>
+
+          <line x1="478" y1="700" x2="320" y2="700" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrowAccent)"/>
+          <text class="edge-label accent" x="399" y="722" text-anchor="middle">/on_select</text>
+
+          <!-- Beckn Protocol Strip -->
+          <g>
+            <rect x="40" y="760" width="1160" height="64" rx="12" fill="var(--accent-2)" stroke="var(--accent)" stroke-opacity="0.4"/>
+            <text x="620" y="788" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="600" font-size="16" fill="var(--ink)">Beckn Protocol Exchange</text>
+            <text x="620" y="810" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="var(--text)">/init   ·   /confirm   ·   /status   ·   /track   ·   /update   ·   /reconcile</text>
+          </g>
+
+          <!-- Connector to Consumer -->
+          <line x1="180" y1="824" x2="180" y2="868" stroke="var(--rail)" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+          <!-- L5: Consumer -->
+          <g class="node">
+            <rect class="body" x="60" y="868" width="240" height="44" rx="10" fill="var(--panel)" stroke="var(--border)"/>
+            <text x="180" y="896" text-anchor="middle" font-family="Inter, system-ui" font-size="14">
+              <tspan fill="var(--ink)" font-weight="600">Consumer</tspan>
+              <tspan fill="var(--muted)" font-style="italic"> — uses the app</tspan>
+            </text>
+          </g>
+        </svg>
+
+        <div class="legend">
+          <span class="item"><span class="swatch accent"></span> ION-governed flow</span>
+          <span class="item"><span class="swatch"></span> Service relationship</span>
+          <span class="item" style="margin-left:auto;color:var(--muted);">Hover any node to highlight.</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="tiers" class="tiers">
+      <div class="section-head">
+        <h2>The five layers, top to bottom</h2>
+        <span class="hint">Governance → Profile → Services → Participants → User</span>
+      </div>
+
+      <div class="tier-grid">
+        <article class="tier span-4">
+          <span class="tier-tag"><span class="bar"></span> L1 — Governance</span>
+          <h3>ION Council</h3>
+          <p>The ratifying body. Sets policies, approves changes to the network profile, and arbitrates disputes between participants.</p>
+        </article>
+
+        <article class="tier span-8">
+          <span class="tier-tag"><span class="bar"></span> L2 — Network profile</span>
+          <h3>ION Network &amp; registries</h3>
+          <p><code>ion.yaml</code> defines the network. The Policy Registry encodes what's allowed; the Error Registry standardises how participants report failure.</p>
+          <ul>
+            <li>ion.yaml</li>
+            <li>Policy Registry</li>
+            <li>Error Registry</li>
+          </ul>
+        </article>
+
+        <article class="tier span-4">
+          <span class="tier-tag"><span class="bar"></span> L3 — Service</span>
+          <h3>ION Registry</h3>
+          <p>The on-DeDi directory of every participant. BAPs and BPPs register here so the network knows who's authorised to transact.</p>
+          <ul><li>on DeDi</li></ul>
+        </article>
+
+        <article class="tier span-4">
+          <span class="tier-tag"><span class="bar"></span> L3 — Service</span>
+          <h3>Catalogue Service</h3>
+          <p>BPPs publish their offerings to the Beckn Fabric so buyer apps can search across providers without point-to-point integrations.</p>
+          <ul><li>Beckn Fabric</li></ul>
+        </article>
+
+        <article class="tier span-4">
+          <span class="tier-tag"><span class="bar"></span> L3 — Service</span>
+          <h3>Discover Service (CDS)</h3>
+          <p>BAPs query and subscribe to discover catalogues, providers, and updates relevant to their users.</p>
+          <ul><li>queries</li><li>subscribes</li></ul>
+        </article>
+
+        <article class="tier span-6">
+          <span class="tier-tag"><span class="bar"></span> L4 — Participant</span>
+          <h3>BAP — Beckn Application Platform</h3>
+          <p>The buyer-facing surface. Calls <code style="font-family:JetBrains Mono,monospace;font-size:12.5px;color:var(--accent);background:var(--accent-2);padding:1px 6px;border-radius:5px;">/select</code> to express intent and consumes <code style="font-family:JetBrains Mono,monospace;font-size:12.5px;color:var(--accent);background:var(--accent-2);padding:1px 6px;border-radius:5px;">/on_select</code> back from BPPs.</p>
+          <ul><li>Tokopedia</li><li>Shopee</li><li>Lazada</li><li>Partner apps</li></ul>
+        </article>
+
+        <article class="tier span-6">
+          <span class="tier-tag"><span class="bar"></span> L4 — Participant</span>
+          <h3>BPP — Beckn Provider Platform</h3>
+          <p>The supply-side surface. Merchants and logistics providers expose inventory, fulfilment, and order-state through standard endpoints.</p>
+          <ul><li>Merchants</li><li>JNE</li><li>J&amp;T</li><li>LSPs</li><li>Warehouses</li></ul>
+        </article>
+
+        <article id="protocol" class="tier span-12" style="background:transparent;border:none;box-shadow:none;padding:0;">
+          <div class="protocol">
+            <b>Beckn Protocol Exchange</b>
+            <span style="color:var(--text-2);font-size:14px;">— shared rail between every BAP and BPP:</span>
+            <span class="endpoints">
+              <code>/init</code><code>/confirm</code><code>/status</code>
+              <code>/track</code><code>/update</code><code>/reconcile</code>
+            </span>
+          </div>
+        </article>
+
+        <article class="tier span-12">
+          <span class="tier-tag"><span class="bar"></span> L5 — End user</span>
+          <h3>Consumer</h3>
+          <p>The person opening a buyer app. Everything above exists so a consumer in Jakarta can search a single storefront and transact with any registered provider on the network.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      <span>© ION Network · Reference diagram</span>
+      <span><a href="#top">Back to top ↑</a></span>
+    </footer>
+  </main>
+
+</body>
+</html>
