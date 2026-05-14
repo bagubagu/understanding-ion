@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>End-to-end transaction · ION Network</title>
+  <meta name="description" content="A worked example: a consumer buys a smartphone on Pasar Sapa from a Jakarta merchant, paid via GoPay and fulfilled by JNE — visualised across the Trade, Payment, and Logistics sectors of the ION Network." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231E2761'/%3E%3Ctext x='16' y='22' font-family='ui-sans-serif,system-ui' font-size='18' font-weight='700' fill='%23F7F7F4' text-anchor='middle'%3EI%3C/text%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #F7F6F1;
+      --bg-soft:   #EFEEE7;
+      --panel:     #FFFFFF;
+      --ink:       #1E2761;
+      --ink-soft:  #3E4B7C;
+      --text:      #1F2230;
+      --text-2:    #5B6075;
+      --muted:     #8A8FA5;
+      --border:    #E2E1D8;
+      --rail:      #B7BBCB;
+      --accent:    #C96442;     /* trade */
+      --accent-2:  #F0E2DC;
+      --logi:      #117A65;     /* logistics */
+      --logi-2:    #DEEEE9;
+      --pay:       #6F47C0;     /* payment */
+      --pay-2:     #ECE5F7;
+      --status:    #4F8A6F;     /* status push events */
+      --offnet:    #8A8FA5;     /* off-network (e.g. QRIS scan, BI-FAST internal) */
+      --panel-alt: #EEF1FA;
+      --shadow:    0 1px 2px rgba(15, 22, 50, 0.04), 0 8px 24px rgba(15, 22, 50, 0.06);
+      --radius:    14px;
+      --max:       1320px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0E1024;
+        --bg-soft:   #15183A;
+        --panel:     #1A1E45;
+        --ink:       #E8EBFF;
+        --ink-soft:  #B7BCE0;
+        --text:      #E8EBFF;
+        --text-2:    #A6ABCB;
+        --muted:     #7E84A6;
+        --border:    #272C57;
+        --rail:      #3A4178;
+        --accent:    #E07A57;
+        --accent-2:  #3A2A22;
+        --logi:      #2BA38B;
+        --logi-2:    #1B3934;
+        --pay:       #9670DC;
+        --pay-2:     #2A1F4A;
+        --status:    #5DAF8B;
+        --offnet:    #6F7596;
+        --panel-alt: #232862;
+        --shadow:    0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text); background: var(--bg);
+      line-height: 1.55; -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 28px; }
+
+    /* ===== Nav ===== */
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: saturate(140%) blur(8px);
+      background: color-mix(in oklab, var(--bg) 80%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink); text-decoration: none; }
+    .brand-mark {
+      width: 26px; height: 26px; border-radius: 7px; background: var(--ink); color: #fff;
+      display: grid; place-items: center; font-family: "Fraunces", serif; font-weight: 700;
+    }
+    .nav-links { display: flex; gap: 22px; font-size: 14px; color: var(--text-2); }
+    .nav-links a { text-decoration: none; }
+    .nav-links a.active { color: var(--ink); font-weight: 600; }
+    .nav-links a:hover { color: var(--ink); }
+    @media (max-width: 720px) { .nav-links { display: none; } }
+
+    /* ===== Hero ===== */
+    .hero { padding: 56px 0 22px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 999px;
+      background: var(--accent-2); color: var(--accent);
+      font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    h1 {
+      font-family: "Fraunces", Georgia, serif; font-weight: 600;
+      font-size: clamp(34px, 4.8vw, 56px); line-height: 1.05;
+      letter-spacing: -0.02em; color: var(--ink); margin: 18px 0 14px;
+    }
+    .lede { font-size: clamp(15px, 1.55vw, 18px); color: var(--text-2); max-width: 800px; }
+
+    /* ===== Scenario card ===== */
+    .scenario {
+      margin-top: 24px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 22px 24px;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    }
+    @media (min-width: 700px)  { .scenario { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1080px) { .scenario { grid-template-columns: repeat(6, 1fr); } }
+
+    .actor {
+      display: flex; flex-direction: column; gap: 4px;
+      padding: 12px 14px;
+      background: var(--bg-soft); border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .actor .role { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .actor .name { font-weight: 600; color: var(--ink); }
+    .actor .meta { font-size: 12.5px; color: var(--text-2); }
+    .actor.trade   { border-left: 3px solid var(--accent); }
+    .actor.logi    { border-left: 3px solid var(--logi); }
+    .actor.pay     { border-left: 3px solid var(--pay); }
+    .actor.user    { border-left: 3px solid var(--ink); }
+    .actor.network { border-left: 3px solid var(--rail); }
+
+    /* ===== Diagram card ===== */
+    section.diagram { padding: 36px 0 16px; }
+    .diagram-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 8px 8px;
+      overflow-x: auto;
+    }
+    .diagram-card svg {
+      display: block;
+      min-width: 1100px;
+      width: 100%;
+      height: auto;
+    }
+
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      padding: 14px 12px 6px;
+      font-size: 12.5px; color: var(--text-2);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .legend .item { display: inline-flex; align-items: center; gap: 8px; }
+    .legend .swatch { width: 22px; height: 3px; border-radius: 2px; background: var(--accent); }
+    .legend .swatch.logi   { background: var(--logi); }
+    .legend .swatch.pay    { background: var(--pay); }
+    .legend .swatch.status { background: var(--status); }
+    .legend .swatch.offnet {
+      background: transparent; border-top: 2px dashed var(--offnet);
+      width: 22px; height: 0;
+    }
+
+    /* ===== Phase narrative ===== */
+    section.phases { padding: 56px 0 24px; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+    .section-head h2 {
+      font-family: "Fraunces", Georgia, serif; font-weight: 600;
+      font-size: clamp(24px, 2.6vw, 32px);
+      letter-spacing: -0.015em; color: var(--ink); margin: 0;
+    }
+    .section-head .hint { color: var(--muted); font-size: 14px; }
+
+    .phase-grid {
+      display: grid; grid-template-columns: 1fr; gap: 14px;
+    }
+    @media (min-width: 760px) { .phase-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1080px) { .phase-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .phase {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 18px 20px 16px; position: relative;
+    }
+    .phase .num {
+      position: absolute; top: -12px; left: 18px;
+      background: var(--ink); color: #fff;
+      width: 28px; height: 28px; border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: "Fraunces", serif; font-weight: 700; font-size: 14px;
+    }
+    .phase .tag {
+      display: inline-block; margin-top: 6px;
+      font-size: 10.5px; letter-spacing: 1.3px; text-transform: uppercase;
+      color: var(--accent); font-weight: 700;
+    }
+    .phase.logi  .tag { color: var(--logi); }
+    .phase.pay   .tag { color: var(--pay); }
+    .phase.both  .tag { color: var(--ink-soft); }
+    .phase.user  .tag { color: var(--ink); }
+    .phase h3 {
+      font-family: "Fraunces", Georgia, serif; font-weight: 600;
+      font-size: 18px; letter-spacing: -0.01em; color: var(--ink);
+      margin: 6px 0 6px;
+    }
+    .phase p { color: var(--text-2); margin: 0 0 10px; font-size: 14px; }
+    .phase ul { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 5px; }
+    .phase ul li {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 11.5px; color: var(--ink-soft);
+      padding: 3px 8px; border-radius: 5px;
+      background: var(--panel-alt);
+      border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
+    }
+    .phase.logi ul li {
+      color: var(--logi); background: var(--logi-2);
+      border-color: color-mix(in oklab, var(--logi) 25%, transparent);
+    }
+    .phase.pay ul li {
+      color: var(--pay); background: var(--pay-2);
+      border-color: color-mix(in oklab, var(--pay) 25%, transparent);
+    }
+
+    .keynote {
+      grid-column: 1 / -1;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+    }
+    .keynote b {
+      font-family: "Fraunces", Georgia, serif; font-size: 18px; color: var(--ink); font-weight: 600;
+    }
+    .keynote code {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 12.5px; color: var(--ink);
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 6px;
+    }
+    .keynote code.t { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 25%, transparent); }
+    .keynote code.l { color: var(--logi);   border-color: color-mix(in oklab, var(--logi) 25%, transparent); }
+    .keynote code.p { color: var(--pay);    border-color: color-mix(in oklab, var(--pay) 25%, transparent); }
+
+    /* ===== Footer ===== */
+    footer {
+      margin-top: 64px; padding: 28px 0 48px;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 13px;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    footer a { color: var(--text-2); text-decoration: none; }
+    footer a:hover { color: var(--ink); }
+
+    /* ===== SVG-specific styles ===== */
+    .lane-label { font: 600 13px "Inter", system-ui; fill: var(--ink); }
+    .lane-sub   { font: 400 11px "Inter", system-ui; fill: var(--text-2); }
+    .lane-rail  { stroke: var(--rail); stroke-dasharray: 3 4; stroke-width: 1; }
+    .phase-band-label {
+      font: 700 11px "Inter", system-ui;
+      fill: var(--muted);
+      letter-spacing: 1.4px; text-transform: uppercase;
+    }
+    .msg-label  { font: 500 12px "JetBrains Mono", ui-monospace, monospace; fill: var(--ink); }
+    .msg-sub    { font: italic 11px "Inter", system-ui; fill: var(--text-2); }
+    .msg-arrow.trade  { stroke: var(--accent); stroke-width: 1.6; fill: none; }
+    .msg-arrow.logi   { stroke: var(--logi);   stroke-width: 1.6; fill: none; }
+    .msg-arrow.pay    { stroke: var(--pay);    stroke-width: 1.6; fill: none; }
+    .msg-arrow.status { stroke: var(--status); stroke-width: 1.6; fill: none; }
+    .msg-arrow.offnet { stroke: var(--offnet); stroke-width: 1.4; fill: none; stroke-dasharray: 4 4; }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">I</span>
+        <span>ION Network</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html#diagram">Architecture</a>
+        <a href="index.html#tiers">Layers</a>
+        <a href="transaction.html">Transaction</a>
+        <a href="transaction_with_payment.html" class="active">Transaction + Payment</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section class="hero">
+      <span class="eyebrow"><span class="dot"></span>End-to-end · Trade × Payment × Logistics</span>
+      <h1>One purchase, three contracts — joined by <code style="font-family:JetBrains Mono,monospace;font-size:0.6em;color:var(--accent);background:var(--accent-2);padding:2px 10px;border-radius:6px;vertical-align:middle;">linkedContractId</code>.</h1>
+      <p class="lede">
+        A consumer in Surabaya buys a smartphone on Pasar Sapa from a Jakarta merchant. Payment goes through GoPay, fulfilment through JNE.
+        Each sector — Trade, Payment, Logistics — runs its own Beckn message exchange under terms ratified by ION,
+        and the three contracts stitch together through one shared identifier.
+      </p>
+
+      <div class="scenario">
+        <div class="actor user">
+          <span class="role">Consumer</span>
+          <span class="name">Andi</span>
+          <span class="meta">Surabaya · 35-XXXX</span>
+        </div>
+        <div class="actor network">
+          <span class="role">BAP · all sectors</span>
+          <span class="name">Pasar Sapa</span>
+          <span class="meta">Buyer app</span>
+        </div>
+        <div class="actor trade">
+          <span class="role">BPP · Trade</span>
+          <span class="name">Toko Elektronik</span>
+          <span class="meta">Jakarta · electronics</span>
+        </div>
+        <div class="actor pay">
+          <span class="role">BPP · Payment</span>
+          <span class="name">GoPay</span>
+          <span class="meta">QRIS · BI-FAST rail</span>
+        </div>
+        <div class="actor logi">
+          <span class="role">BPP · Logistics</span>
+          <span class="name">JNE</span>
+          <span class="meta">LOG-PARCEL · NEXT_DAY</span>
+        </div>
+        <div class="actor network">
+          <span class="role">ION services</span>
+          <span class="name">Catalogue · CDS</span>
+          <span class="meta">Policy registry</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="diagram">
+      <div class="diagram-card">
+        <!-- ===== Sequence diagram ===== -->
+        <svg viewBox="0 0 1280 2580" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-title t-desc">
+          <title id="t-title">End-to-end ION transaction sequence with payment BPP</title>
+          <desc id="t-desc">Sequence diagram across six lanes — Consumer, BAP (Pasar Sapa), BPP-Trade (Toko Elektronik), BPP-Payment (GoPay), BPP-Logistics (JNE), and ION Services — showing catalog discovery, Trade quote, Payment select-init-status, Trade confirm, Logistics select-init-confirm with linkedContractId, transit, delivery, rating, and a three-way reconcile.</desc>
+
+          <defs>
+            <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+            </marker>
+            <marker id="ahL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--logi)"/>
+            </marker>
+            <marker id="ahP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--pay)"/>
+            </marker>
+            <marker id="ahS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--status)"/>
+            </marker>
+            <marker id="ahO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--offnet)"/>
+            </marker>
+          </defs>
+
+          <!-- ====== Lane headers ======
+               Lane x positions:
+                 Consumer  :   90
+                 BAP       :  290
+                 BPP-Trade :  490
+                 BPP-Pay   :  690
+                 BPP-Logi  :  890
+                 ION Svc   : 1090
+          -->
+          <g>
+            <rect x="20"   y="20" width="140" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--border)"/>
+            <text class="lane-label" x="90" y="44" text-anchor="middle">Consumer</text>
+            <text class="lane-sub"   x="90" y="62" text-anchor="middle">Andi · Surabaya</text>
+            <line class="lane-rail" x1="90" y1="80" x2="90" y2="2540"/>
+
+            <rect x="220"  y="20" width="140" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--border)"/>
+            <text class="lane-label" x="290" y="40" text-anchor="middle">BAP</text>
+            <text class="lane-sub"   x="290" y="58" text-anchor="middle">Pasar Sapa</text>
+            <text class="lane-sub"   x="290" y="72" text-anchor="middle" font-style="italic">all 3 sectors</text>
+            <line class="lane-rail" x1="290" y1="80" x2="290" y2="2540"/>
+
+            <rect x="420"  y="20" width="140" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--accent)"/>
+            <text class="lane-label" x="490" y="40" text-anchor="middle">BPP · Trade</text>
+            <text class="lane-sub"   x="490" y="58" text-anchor="middle">Toko Elektronik</text>
+            <text class="lane-sub"   x="490" y="72" text-anchor="middle" font-style="italic">Jakarta merchant</text>
+            <line class="lane-rail" x1="490" y1="80" x2="490" y2="2540" stroke="var(--accent)" opacity="0.4"/>
+
+            <rect x="620"  y="20" width="140" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--pay)"/>
+            <text class="lane-label" x="690" y="40" text-anchor="middle">BPP · Payment</text>
+            <text class="lane-sub"   x="690" y="58" text-anchor="middle">GoPay</text>
+            <text class="lane-sub"   x="690" y="72" text-anchor="middle" font-style="italic">QRIS · BI-FAST</text>
+            <line class="lane-rail" x1="690" y1="80" x2="690" y2="2540" stroke="var(--pay)" opacity="0.4"/>
+
+            <rect x="820"  y="20" width="140" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--logi)"/>
+            <text class="lane-label" x="890" y="40" text-anchor="middle">BPP · Logistics</text>
+            <text class="lane-sub"   x="890" y="58" text-anchor="middle">JNE</text>
+            <text class="lane-sub"   x="890" y="72" text-anchor="middle" font-style="italic">LOG-PARCEL</text>
+            <line class="lane-rail" x1="890" y1="80" x2="890" y2="2540" stroke="var(--logi)" opacity="0.4"/>
+
+            <rect x="1020" y="20" width="140" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--border)"/>
+            <text class="lane-label" x="1090" y="40" text-anchor="middle">ION Services</text>
+            <text class="lane-sub"   x="1090" y="58" text-anchor="middle">Catalogue · CDS</text>
+            <text class="lane-sub"   x="1090" y="72" text-anchor="middle" font-style="italic">Policy registry</text>
+            <line class="lane-rail" x1="1090" y1="80" x2="1090" y2="2540"/>
+          </g>
+
+          <!-- ============================================================
+               PHASE 1 · CATALOG  (y 100–270)
+          ============================================================ -->
+          <rect x="10" y="100" width="1240" height="170" rx="8" fill="var(--bg-soft)" opacity="0.55"/>
+          <text class="phase-band-label" x="22" y="118">Phase 1 · Catalog (background)</text>
+
+          <line class="msg-arrow trade" x1="490" y1="148" x2="1085" y2="148" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="780" y="142" text-anchor="middle">/catalog/publish</text>
+          <text class="msg-sub"   x="780" y="159" text-anchor="middle">Toko Elektronik publishes products + policy IRIs</text>
+
+          <line class="msg-arrow pay"   x1="690" y1="180" x2="1085" y2="180" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="888" y="174" text-anchor="middle">/catalog/publish</text>
+          <text class="msg-sub"   x="888" y="191" text-anchor="middle">GoPay publishes payment methods + MDR</text>
+
+          <line class="msg-arrow logi"  x1="890" y1="208" x2="1085" y2="208" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="990" y="202" text-anchor="middle">/catalog/publish</text>
+          <text class="msg-sub"   x="990" y="219" text-anchor="middle">JNE publishes rate logic + coverage</text>
+
+          <line class="msg-arrow trade" x1="1085" y1="238" x2="295" y2="238" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="700" y="232" text-anchor="middle">/on_subscribe → catalogs</text>
+          <text class="msg-sub"   x="700" y="249" text-anchor="middle">Pasar Sapa keeps a fresh local index</text>
+
+          <!-- ============================================================
+               PHASE 2 · BROWSE  (y 280–340)
+          ============================================================ -->
+          <text class="phase-band-label" x="22" y="298">Phase 2 · Browse</text>
+          <line class="msg-arrow trade" x1="92" y1="320" x2="285" y2="320" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="188" y="314" text-anchor="middle">search "smartphone"</text>
+          <text class="msg-sub"   x="188" y="332" text-anchor="middle">Andi opens Pasar Sapa, finds Toko Elektronik</text>
+
+          <!-- ============================================================
+               PHASE 3 · TRADE · /select  (y 350–450)
+          ============================================================ -->
+          <rect x="10" y="350" width="1240" height="100" rx="8" fill="var(--accent-2)" opacity="0.35"/>
+          <text class="phase-band-label" x="22" y="368">Phase 3 · Trade · /select → /on_select</text>
+
+          <line class="msg-arrow trade" x1="290" y1="390" x2="485" y2="390" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="384" text-anchor="middle">/select</text>
+          <text class="msg-sub"   x="388" y="402" text-anchor="middle">item, qty=1, drop pincode 35-XXX</text>
+
+          <line class="msg-arrow trade" x1="485" y1="430" x2="295" y2="430" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="424" text-anchor="middle">/on_select</text>
+          <text class="msg-sub"   x="388" y="442" text-anchor="middle">quote.breakup: ITEM 5,000,000 + TAX (PPN 11%) 553,850</text>
+
+          <!-- ============================================================
+               PHASE 4 · TRADE · /init  (y 460–560)
+          ============================================================ -->
+          <rect x="10" y="460" width="1240" height="100" rx="8" fill="var(--accent-2)" opacity="0.35"/>
+          <text class="phase-band-label" x="22" y="478">Phase 4 · Trade · /init → /on_init</text>
+
+          <line class="msg-arrow trade" x1="290" y1="500" x2="485" y2="500" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="494" text-anchor="middle">/init</text>
+          <text class="msg-sub"   x="388" y="512" text-anchor="middle">full address, gift wrap, payment intent = via Payment BPP</text>
+
+          <line class="msg-arrow trade" x1="485" y1="540" x2="295" y2="540" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="534" text-anchor="middle">/on_init</text>
+          <text class="msg-sub"   x="388" y="552" text-anchor="middle">paymentRequest: amount 5,588,850 IDR · payee VPA</text>
+
+          <!-- ============================================================
+               PHASE 5 · PAYMENT · /select  (y 570–670)
+          ============================================================ -->
+          <rect x="10" y="570" width="1240" height="100" rx="8" fill="var(--pay-2)" opacity="0.5"/>
+          <text class="phase-band-label" x="22" y="588">Phase 5 · Payment · /select → /on_select</text>
+
+          <line class="msg-arrow pay" x1="290" y1="610" x2="685" y2="610" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="604" text-anchor="middle">/select</text>
+          <text class="msg-sub"   x="487" y="622" text-anchor="middle">amount, payer wallet, payee VPA, intent = consumer authorize</text>
+
+          <line class="msg-arrow pay" x1="685" y1="650" x2="295" y2="650" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="644" text-anchor="middle">/on_select</text>
+          <text class="msg-sub"   x="487" y="662" text-anchor="middle">methods: QRIS · VA · EWALLET · MDR per method</text>
+
+          <!-- ============================================================
+               PHASE 6 · PAYMENT · /init  (y 680–780)
+          ============================================================ -->
+          <rect x="10" y="680" width="1240" height="100" rx="8" fill="var(--pay-2)" opacity="0.5"/>
+          <text class="phase-band-label" x="22" y="698">Phase 6 · Payment · /init → /on_init</text>
+
+          <line class="msg-arrow pay" x1="290" y1="720" x2="685" y2="720" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="714" text-anchor="middle">/init</text>
+          <text class="msg-sub"   x="487" y="732" text-anchor="middle">selected method = QRIS · idempotency key</text>
+
+          <line class="msg-arrow pay" x1="685" y1="760" x2="295" y2="760" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="754" text-anchor="middle">/on_init</text>
+          <text class="msg-sub"   x="487" y="772" text-anchor="middle">qrisString · expiresAt PT5M · paymentRef PAY/2026/0429/G7H8</text>
+
+          <!-- ============================================================
+               PHASE 7 · PAYMENT · /confirm + authorize  (y 790–950)
+          ============================================================ -->
+          <rect x="10" y="790" width="1240" height="160" rx="8" fill="var(--pay-2)" opacity="0.5"/>
+          <text class="phase-band-label" x="22" y="808">Phase 7 · Payment · /confirm → /on_status [PAID]  ·  <tspan fill="var(--accent)">links to Trade contract</tspan></text>
+
+          <line class="msg-arrow pay" x1="290" y1="830" x2="685" y2="830" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="824" text-anchor="middle">/confirm</text>
+          <text class="msg-sub"   x="487" y="842" text-anchor="middle">linkedContractId = TRADE/2026/0429/A1F2</text>
+
+          <line class="msg-arrow pay" x1="685" y1="868" x2="295" y2="868" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="862" text-anchor="middle">/on_confirm</text>
+          <text class="msg-sub"   x="487" y="880" text-anchor="middle">Payment contract ACTIVE · awaiting consumer authorize</text>
+
+          <!-- consumer authorizes (still off-network for the actual scan) -->
+          <line class="msg-arrow offnet" x1="92" y1="908" x2="685" y2="908" marker-end="url(#ahO)"/>
+          <text class="msg-label" x="388" y="902" text-anchor="middle">scan QRIS · authorize in GoPay app</text>
+          <text class="msg-sub"   x="388" y="920" text-anchor="middle">off-network · settlement over BI-FAST</text>
+
+          <line class="msg-arrow status" x1="685" y1="940" x2="295" y2="940" marker-end="url(#ahS)"/>
+          <text class="msg-label" x="487" y="934" text-anchor="middle">/on_status [PAID]</text>
+          <text class="msg-sub"   x="487" y="958" text-anchor="middle">settlementId · NTPN · authorizedAt</text>
+
+          <!-- ============================================================
+               PHASE 8 · TRADE · /confirm  (y 970–1080)
+          ============================================================ -->
+          <rect x="10" y="970" width="1240" height="110" rx="8" fill="var(--accent-2)" opacity="0.35"/>
+          <text class="phase-band-label" x="22" y="988">Phase 8 · Trade · /confirm → /on_confirm  ·  <tspan fill="var(--pay)">paymentReference attached</tspan></text>
+
+          <line class="msg-arrow trade" x1="290" y1="1012" x2="485" y2="1012" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="1006" text-anchor="middle">/confirm</text>
+          <text class="msg-sub"   x="388" y="1024" text-anchor="middle">paymentReference = PAY/2026/0429/G7H8 · NTPN ref</text>
+
+          <line class="msg-arrow trade" x1="485" y1="1052" x2="295" y2="1052" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="1046" text-anchor="middle">/on_confirm</text>
+          <text class="msg-sub"   x="388" y="1070" text-anchor="middle">Trade contract ACTIVE · fakturPajakReference · fulfillingLocationId</text>
+
+          <!-- ============================================================
+               PHASE 9 · LOGISTICS · /select  (y 1100–1200)
+          ============================================================ -->
+          <rect x="10" y="1100" width="1240" height="100" rx="8" fill="var(--logi-2)" opacity="0.55"/>
+          <text class="phase-band-label" x="22" y="1118">Phase 9 · Logistics · /select → /on_select</text>
+
+          <line class="msg-arrow logi" x1="290" y1="1140" x2="885" y2="1140" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1134" text-anchor="middle">/select</text>
+          <text class="msg-sub"   x="587" y="1152" text-anchor="middle">pickup Jakarta · drop Surabaya · 1.2 kg · NEXT_DAY · declared 5,000,000</text>
+
+          <line class="msg-arrow logi" x1="885" y1="1180" x2="295" y2="1180" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1174" text-anchor="middle">/on_select</text>
+          <text class="msg-sub"   x="587" y="1192" text-anchor="middle">binding rate 35,000 · quoteValidityWindow PT1H</text>
+
+          <!-- ============================================================
+               PHASE 10 · LOGISTICS · /init  (y 1220–1320)
+          ============================================================ -->
+          <rect x="10" y="1220" width="1240" height="100" rx="8" fill="var(--logi-2)" opacity="0.55"/>
+          <text class="phase-band-label" x="22" y="1238">Phase 10 · Logistics · /init → /on_init</text>
+
+          <line class="msg-arrow logi" x1="290" y1="1260" x2="885" y2="1260" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1254" text-anchor="middle">/init</text>
+          <text class="msg-sub"   x="587" y="1272" text-anchor="middle">pickup + drop addresses · FWA Pasar Sapa × JNE 2026Q2</text>
+
+          <line class="msg-arrow logi" x1="885" y1="1300" x2="295" y2="1300" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1294" text-anchor="middle">/on_init</text>
+          <text class="msg-sub"   x="587" y="1312" text-anchor="middle">FWA validated · settlement preview</text>
+
+          <!-- ============================================================
+               PHASE 11 · LOGISTICS · /confirm  (y 1340–1450)
+          ============================================================ -->
+          <rect x="10" y="1340" width="1240" height="110" rx="8" fill="var(--logi-2)" opacity="0.55"/>
+          <text class="phase-band-label" x="22" y="1358">Phase 11 · Logistics · /confirm → /on_confirm  ·  <tspan fill="var(--accent)">links to Trade contract</tspan></text>
+
+          <line class="msg-arrow logi" x1="290" y1="1382" x2="885" y2="1382" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1376" text-anchor="middle">/confirm</text>
+          <text class="msg-sub"   x="587" y="1394" text-anchor="middle">linkedContractId = TRADE/2026/0429/A1F2</text>
+
+          <line class="msg-arrow logi" x1="885" y1="1422" x2="295" y2="1422" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1416" text-anchor="middle">/on_confirm</text>
+          <text class="msg-sub"   x="587" y="1440" text-anchor="middle">Logistics contract ACTIVE · awbNumber JNE-2026-7K3M9X</text>
+
+          <!-- ============================================================
+               PHASE 12 · PICKUP EVENTS  (y 1470–1580)
+          ============================================================ -->
+          <rect x="10" y="1470" width="1240" height="110" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
+          <text class="phase-band-label" x="22" y="1488">Phase 12 · Pickup events</text>
+
+          <line class="msg-arrow status" x1="485" y1="1512" x2="295" y2="1512" marker-end="url(#ahS)"/>
+          <text class="msg-label" x="388" y="1506" text-anchor="middle">/on_status [DISPATCHED]</text>
+          <text class="msg-sub"   x="388" y="1524" text-anchor="middle">awbNumber · trackingUrl · ETA</text>
+
+          <line class="msg-arrow status" x1="885" y1="1552" x2="295" y2="1552" marker-end="url(#ahS)"/>
+          <text class="msg-label" x="587" y="1546" text-anchor="middle">/on_status [PICKED_UP]</text>
+          <text class="msg-sub"   x="587" y="1564" text-anchor="middle">agentName · phoneProxy · vehiclePlate</text>
+
+          <!-- ============================================================
+               PHASE 13 · TRANSIT  (y 1600–1750)
+          ============================================================ -->
+          <rect x="10" y="1600" width="1240" height="150" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
+          <text class="phase-band-label" x="22" y="1618">Phase 13 · Transit · /track + on_status</text>
+
+          <line class="msg-arrow status" x1="885" y1="1640" x2="295" y2="1640" marker-end="url(#ahS)"/>
+          <text class="msg-label" x="587" y="1634" text-anchor="middle">/on_status [IN_TRANSIT]</text>
+          <text class="msg-sub"   x="587" y="1652" text-anchor="middle">at Jakarta hub · P2H2P routing</text>
+
+          <line class="msg-arrow logi" x1="290" y1="1676" x2="885" y2="1676" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1670" text-anchor="middle">/track</text>
+          <text class="msg-sub"   x="587" y="1688" text-anchor="middle">request live GPS handle</text>
+
+          <line class="msg-arrow logi" x1="885" y1="1710" x2="295" y2="1710" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="1704" text-anchor="middle">/on_track</text>
+          <text class="msg-sub"   x="587" y="1722" text-anchor="middle">WebSocket URL streams live coordinates</text>
+
+          <line class="msg-arrow status" x1="885" y1="1742" x2="295" y2="1742" marker-end="url(#ahS)"/>
+          <text class="msg-label" x="587" y="1736" text-anchor="middle">/on_status [OUT_FOR_DELIVERY]</text>
+
+          <!-- ============================================================
+               PHASE 14 · DELIVERED  (y 1770–1910)
+          ============================================================ -->
+          <rect x="10" y="1770" width="1240" height="140" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
+          <text class="phase-band-label" x="22" y="1788">Phase 14 · Delivered</text>
+
+          <line class="msg-arrow status" x1="885" y1="1812" x2="295" y2="1812" marker-end="url(#ahS)"/>
+          <text class="msg-label" x="587" y="1806" text-anchor="middle">/on_status [DELIVERED]</text>
+          <text class="msg-sub"   x="587" y="1824" text-anchor="middle">deliveryProofUrl (photo)</text>
+
+          <line class="msg-arrow trade" x1="290" y1="1850" x2="485" y2="1850" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="1844" text-anchor="middle">/update [DELIVERED]</text>
+          <text class="msg-sub"   x="388" y="1862" text-anchor="middle">Trade contract → COMPLETE</text>
+
+          <line class="msg-arrow status" x1="285" y1="1890" x2="95" y2="1890" marker-end="url(#ahS)"/>
+          <text class="msg-label" x="190" y="1884" text-anchor="middle">push: "delivered"</text>
+
+          <!-- ============================================================
+               PHASE 15 · RATING  (y 1930–2060)
+          ============================================================ -->
+          <rect x="10" y="1930" width="1240" height="130" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
+          <text class="phase-band-label" x="22" y="1948">Phase 15 · Rating</text>
+
+          <line class="msg-arrow trade" x1="92" y1="1972" x2="285" y2="1972" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="188" y="1966" text-anchor="middle">5★ + comment</text>
+
+          <line class="msg-arrow trade" x1="290" y1="2010" x2="485" y2="2010" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="2004" text-anchor="middle">/rate (PROVIDER, ITEM)</text>
+
+          <line class="msg-arrow logi" x1="290" y1="2046" x2="885" y2="2046" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="2040" text-anchor="middle">/rate (FULFILLMENT, AGENT)</text>
+
+          <!-- ============================================================
+               PHASE 16 · TRADE · /reconcile  (y 2080–2210)
+          ============================================================ -->
+          <rect x="10" y="2080" width="1240" height="130" rx="8" fill="var(--accent-2)" opacity="0.35"/>
+          <text class="phase-band-label" x="22" y="2098">Phase 16 · Trade · /reconcile</text>
+
+          <line class="msg-arrow trade" x1="290" y1="2128" x2="485" y2="2128" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="2122" text-anchor="middle">/reconcile (try=true)</text>
+          <text class="msg-sub"   x="388" y="2140" text-anchor="middle">preview settlement statement</text>
+
+          <line class="msg-arrow trade" x1="485" y1="2168" x2="295" y2="2168" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="2162" text-anchor="middle">/on_reconcile</text>
+          <text class="msg-sub"   x="388" y="2180" text-anchor="middle">PPN remittance + PLATFORM_FEE + bukti potong</text>
+
+          <line class="msg-arrow trade" x1="295" y1="2200" x2="485" y2="2200" marker-end="url(#ahA)"/>
+          <text class="msg-label" x="388" y="2194" text-anchor="middle">/reconcile (commit)</text>
+
+          <!-- ============================================================
+               PHASE 17 · LOGISTICS · /reconcile  (y 2230–2350)
+          ============================================================ -->
+          <rect x="10" y="2230" width="1240" height="120" rx="8" fill="var(--logi-2)" opacity="0.55"/>
+          <text class="phase-band-label" x="22" y="2248">Phase 17 · Logistics · /reconcile (batched monthly)</text>
+
+          <line class="msg-arrow logi" x1="290" y1="2278" x2="885" y2="2278" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="2272" text-anchor="middle">/reconcile (isBatch=true · period=2026-04)</text>
+
+          <line class="msg-arrow logi" x1="885" y1="2316" x2="295" y2="2316" marker-end="url(#ahL)"/>
+          <text class="msg-label" x="587" y="2310" text-anchor="middle">/on_reconcile</text>
+          <text class="msg-sub"   x="587" y="2328" text-anchor="middle">FWA volume rebate · weight-dispute adjustments · NTPN refs</text>
+
+          <!-- ============================================================
+               PHASE 18 · PAYMENT · /reconcile  (y 2370–2470)
+          ============================================================ -->
+          <rect x="10" y="2370" width="1240" height="100" rx="8" fill="var(--pay-2)" opacity="0.5"/>
+          <text class="phase-band-label" x="22" y="2388">Phase 18 · Payment · /reconcile (PSP fees + success rate)</text>
+
+          <line class="msg-arrow pay" x1="290" y1="2418" x2="685" y2="2418" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="2412" text-anchor="middle">/reconcile</text>
+
+          <line class="msg-arrow pay" x1="685" y1="2454" x2="295" y2="2454" marker-end="url(#ahP)"/>
+          <text class="msg-label" x="487" y="2448" text-anchor="middle">/on_reconcile</text>
+          <text class="msg-sub"   x="487" y="2466" text-anchor="middle">MDR · refund-rate · authorization-success-rate</text>
+
+          <!-- ============================================================
+               EPILOGUE  (y 2480–2540)
+          ============================================================ -->
+          <g>
+            <rect x="10" y="2480" width="1240" height="60" rx="10" fill="var(--panel-alt)" opacity="0.65" stroke="var(--border)"/>
+            <text x="635" y="2510" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="600" font-size="18" fill="var(--ink)">Three contracts SETTLED — linked, audit-ready.</text>
+            <text x="635" y="2530" text-anchor="middle" font-family="Inter, system-ui" font-size="12" fill="var(--text-2)">
+              Trade <tspan font-family="JetBrains Mono, monospace" font-size="11.5" fill="var(--accent)">TRADE/2026/0429/A1F2</tspan>
+              ·  Payment <tspan font-family="JetBrains Mono, monospace" font-size="11.5" fill="var(--pay)">PAY/2026/0429/G7H8</tspan>
+              ·  Logistics <tspan font-family="JetBrains Mono, monospace" font-size="11.5" fill="var(--logi)">LOG/2026/0429/J7K9</tspan>
+            </text>
+          </g>
+        </svg>
+
+        <div class="legend">
+          <span class="item"><span class="swatch"></span> Trade message</span>
+          <span class="item"><span class="swatch pay"></span> Payment message</span>
+          <span class="item"><span class="swatch logi"></span> Logistics message</span>
+          <span class="item"><span class="swatch status"></span> Unsolicited status push</span>
+          <span class="item"><span class="swatch offnet"></span> Off-network (BI-FAST rail)</span>
+          <span class="item" style="margin-left:auto;color:var(--muted);">Time flows top to bottom · Scroll horizontally on small screens</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="phases">
+      <div class="section-head">
+        <h2>Step by step</h2>
+        <span class="hint">18 phases · 36 messages · three contracts joined by <code style="font-family:JetBrains Mono,monospace;font-size:13px;color:var(--accent);background:var(--accent-2);padding:1px 6px;border-radius:5px;">linkedContractId</code></span>
+      </div>
+
+      <div class="phase-grid">
+
+        <article class="phase">
+          <span class="num">1</span>
+          <span class="tag">Catalog</span>
+          <h3>Three BPPs publish</h3>
+          <p>Toko Elektronik publishes its product catalog with policy IRIs. GoPay publishes its payment methods and MDR schedule. JNE publishes rate logic and provincial coverage. Pasar Sapa keeps a fresh local index.</p>
+          <ul><li>/catalog/publish ×3</li><li>/on_subscribe</li></ul>
+        </article>
+
+        <article class="phase user">
+          <span class="num">2</span>
+          <span class="tag">Browse</span>
+          <h3>Andi opens the app</h3>
+          <p>Search runs against Pasar Sapa's local index — no live network call. The listing surfaces with its declared <code style="font-family:JetBrains Mono,monospace;font-size:12px;">availability.status</code>.</p>
+        </article>
+
+        <article class="phase">
+          <span class="num">3</span>
+          <span class="tag">Trade · select</span>
+          <h3>Quote the order</h3>
+          <p>BAP submits item, qty, drop pincode. BPP returns a quote with structured breakup including PPN at the rate sourced from current PMK.</p>
+          <ul><li>/select</li><li>/on_select</li><li>quote.breakup</li></ul>
+        </article>
+
+        <article class="phase">
+          <span class="num">4</span>
+          <span class="tag">Trade · init</span>
+          <h3>Address + payment intent</h3>
+          <p>BAP commits the consumer's full Surabaya address. Crucially, the BPP's <code style="font-family:JetBrains Mono,monospace;font-size:12px;">/on_init</code> returns a <b>paymentRequest</b> — amount, payee VPA, idempotency key — to be discharged via the Payment sector.</p>
+          <ul><li>/init</li><li>/on_init</li><li>paymentRequest</li></ul>
+        </article>
+
+        <article class="phase pay">
+          <span class="num">5</span>
+          <span class="tag">Payment · select</span>
+          <h3>Discover methods</h3>
+          <p>BAP queries the Payment BPP with the amount and parties. GoPay returns supported methods (QRIS, VA, EWALLET) with the MDR for each — letting the BAP show price-by-method to the consumer.</p>
+          <ul><li>/select</li><li>/on_select</li><li>methods</li><li>MDR</li></ul>
+        </article>
+
+        <article class="phase pay">
+          <span class="num">6</span>
+          <span class="tag">Payment · init</span>
+          <h3>Get the instrument</h3>
+          <p>Consumer picks QRIS. BAP <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--pay);">/init</code>s the chosen method; GoPay returns the QRIS string with an expiry and a <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--pay);">paymentRef</code>.</p>
+          <ul><li>/init</li><li>/on_init</li><li>qrisString</li><li>expiresAt</li></ul>
+        </article>
+
+        <article class="phase pay">
+          <span class="num">7</span>
+          <span class="tag">Payment · confirm + status</span>
+          <h3>Authorize, then PAID</h3>
+          <p>BAP confirms with <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--accent);">linkedContractId</code> pointing at the Trade contract. Andi scans the QR in his GoPay app — the actual money rides BI-FAST off-network. GoPay then pushes <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--status);">/on_status [PAID]</code> with <code style="font-family:JetBrains Mono,monospace;font-size:12px;">settlementId</code> and <code style="font-family:JetBrains Mono,monospace;font-size:12px;">NTPN</code>.</p>
+          <ul><li>/confirm</li><li>/on_confirm</li><li>/on_status</li><li>NTPN</li></ul>
+        </article>
+
+        <article class="phase">
+          <span class="num">8</span>
+          <span class="tag">Trade · confirm</span>
+          <h3>Bind the Trade contract</h3>
+          <p>Now that payment is verifiable on-network, BAP confirms with the merchant and attaches <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--pay);">paymentReference</code>. Toko Elektronik (PKP) returns Faktur Pajak ref + fulfilment warehouse. <b>Trade contract ACTIVE</b>.</p>
+          <ul><li>/confirm</li><li>/on_confirm</li><li>paymentReference</li><li>fakturPajakReference</li></ul>
+        </article>
+
+        <article class="phase logi">
+          <span class="num">9</span>
+          <span class="tag">Logistics · select</span>
+          <h3>Bind a binding rate</h3>
+          <p>BAP calls JNE with the actual shipment profile — pickup, drop, weight, declared value. JNE returns a binding rate with a quote validity window.</p>
+          <ul><li>/select</li><li>/on_select</li><li>quoteValidityWindow</li></ul>
+        </article>
+
+        <article class="phase logi">
+          <span class="num">10</span>
+          <span class="tag">Logistics · init</span>
+          <h3>Apply Framework Agreement</h3>
+          <p>BAP attaches the active <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">logistics-fwa</code> reference (Pasar Sapa × JNE 2026 Q2). The FWA's commercial envelope supersedes per-offer policies.</p>
+          <ul><li>/init</li><li>/on_init</li><li>fwaReference</li></ul>
+        </article>
+
+        <article class="phase logi">
+          <span class="num">11</span>
+          <span class="tag">Logistics · confirm</span>
+          <h3>The third linked contract</h3>
+          <p>Logistics confirm carries <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--accent);">linkedContractId</code> pointing at the Trade contract. JNE returns an AWB; the Logistics contract is ACTIVE.</p>
+          <ul><li>/confirm</li><li>/on_confirm</li><li>linkedContractId</li><li>awbNumber</li></ul>
+        </article>
+
+        <article class="phase">
+          <span class="num">12</span>
+          <span class="tag">Status</span>
+          <h3>DISPATCHED + PICKED_UP</h3>
+          <p>BPP-Trade pushes <code style="font-family:JetBrains Mono,monospace;font-size:12px;">DISPATCHED</code> with the AWB. JNE collects from the merchant warehouse and pushes <code style="font-family:JetBrains Mono,monospace;font-size:12px;">PICKED_UP</code> — proxy phone numbers only.</p>
+          <ul><li>/on_status</li><li>awbNumber</li><li>phoneProxy</li></ul>
+        </article>
+
+        <article class="phase logi">
+          <span class="num">13</span>
+          <span class="tag">Logistics · transit</span>
+          <h3>Hub routing + live track</h3>
+          <p>JNE moves the parcel through its Jakarta hub (P2H2P). BAP opens a <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">/track</code> session for live GPS, in addition to coarse status pushes.</p>
+          <ul><li>/track</li><li>/on_track</li><li>IN_TRANSIT</li><li>OUT_FOR_DELIVERY</li></ul>
+        </article>
+
+        <article class="phase">
+          <span class="num">14</span>
+          <span class="tag">Delivered</span>
+          <h3>Both contracts close</h3>
+          <p>JNE pushes <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--status);">DELIVERED</code> with a delivery-proof photo. BAP relays via <code style="font-family:JetBrains Mono,monospace;font-size:12px;">/update</code>; Trade contract → COMPLETE. Andi gets a push.</p>
+          <ul><li>/on_status</li><li>deliveryProofUrl</li><li>contract → COMPLETE</li></ul>
+        </article>
+
+        <article class="phase user">
+          <span class="num">15</span>
+          <span class="tag">Rating</span>
+          <h3>Five dimensions, one act</h3>
+          <p>Andi rates once. BAP splits into Trade ratings (PROVIDER, ITEM) and Logistics ratings (FULFILLMENT, PACKAGE_CONDITION, AGENT_BEHAVIOUR).</p>
+          <ul><li>/rate</li><li>5 dimensions</li></ul>
+        </article>
+
+        <article class="phase">
+          <span class="num">16</span>
+          <span class="tag">Trade · reconcile</span>
+          <h3>Money, with proof</h3>
+          <p>BAP previews then commits. The <code style="font-family:JetBrains Mono,monospace;font-size:12px;">/on_reconcile</code> carries PPN remittance, platform fee, and bukti potong references.</p>
+          <ul><li>/reconcile</li><li>PPN · NTPN</li></ul>
+        </article>
+
+        <article class="phase logi">
+          <span class="num">17</span>
+          <span class="tag">Logistics · reconcile</span>
+          <h3>Batched monthly</h3>
+          <p>Per-shipment reconcile doesn't scale at marketplace volume — Logistics settles in monthly batches with <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">isBatch=true</code>, including FWA rebates and weight-dispute adjustments.</p>
+          <ul><li>isBatch</li><li>FWA rebate</li><li>weight adj.</li></ul>
+        </article>
+
+        <article class="phase pay">
+          <span class="num">18</span>
+          <span class="tag">Payment · reconcile</span>
+          <h3>PSP economics</h3>
+          <p>Payment BPPs settle their own economics with the BAP — MDR, refund-rate adjustments, authorisation-success-rate reporting — keeping payment health observable network-side.</p>
+          <ul><li>MDR</li><li>refund-rate</li><li>auth-rate</li></ul>
+        </article>
+
+        <article class="keynote">
+          <b>One identifier, three sectors.</b>
+          <span style="color:var(--text-2);font-size:14px;">The Payment and Logistics contracts both attach</span>
+          <code>linkedContractId</code>
+          <span style="color:var(--text-2);font-size:14px;">pointing at the Trade contract. That single field is what lets the BAP — or any auditor — stitch </span>
+          <code class="t">TRADE/…/A1F2</code>
+          <code class="p">PAY/…/G7H8</code>
+          <code class="l">LOG/…/J7K9</code>
+          <span style="color:var(--text-2);font-size:14px;">into one coherent transaction story.</span>
+        </article>
+
+      </div>
+    </section>
+
+    <footer>
+      <span>© ION Network · End-to-end transaction example</span>
+      <span>
+        <a href="index.html">Architecture overview</a>
+        &nbsp;·&nbsp;
+        <a href="#top">Back to top ↑</a>
+      </span>
+    </footer>
+  </main>
+
+</body>
+</html>
