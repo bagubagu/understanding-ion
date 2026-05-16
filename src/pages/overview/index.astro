@@ -1,325 +1,13 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ION Network · Architecture</title>
-  <meta name="description" content="A reference architecture for the ION Network — governance, network profile, core services, and Beckn participant interactions." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231E2761'/%3E%3Ctext x='16' y='22' font-family='ui-sans-serif,system-ui' font-size='18' font-weight='700' fill='%23F7F7F4' text-anchor='middle'%3EI%3C/text%3E%3C/svg%3E" />
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/architecture.css';
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="ION Network · Architecture" />
-  <meta property="og:description" content="Governance, network profile, core services, and Beckn participants — at a glance." />
-  <meta property="og:type" content="website" />
+const title = "ION Network · Architecture";
+const description = "A reference architecture for the ION Network — governance, network profile, core services, and Beckn participant interactions.";
+---
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg:        #F7F6F1;
-      --bg-soft:   #EFEEE7;
-      --panel:     #FFFFFF;
-      --ink:       #1E2761;
-      --ink-soft:  #3E4B7C;
-      --text:      #1F2230;
-      --text-2:    #5B6075;
-      --muted:     #8A8FA5;
-      --border:    #E2E1D8;
-      --rail:      #B7BBCB;
-      --accent:    #C96442;
-      --accent-2:  #F0E2DC;
-      --panel-alt: #EEF1FA;
-      --shadow:    0 1px 2px rgba(15, 22, 50, 0.04), 0 8px 24px rgba(15, 22, 50, 0.06);
-      --radius:    14px;
-      --radius-sm: 8px;
-      --max:       1240px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg:        #0E1024;
-        --bg-soft:   #15183A;
-        --panel:     #1A1E45;
-        --ink:       #E8EBFF;
-        --ink-soft:  #B7BCE0;
-        --text:      #E8EBFF;
-        --text-2:    #A6ABCB;
-        --muted:     #7E84A6;
-        --border:    #272C57;
-        --rail:      #3A4178;
-        --accent:    #E07A57;
-        --accent-2:  #3A2A22;
-        --panel-alt: #232862;
-        --shadow:    0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px rgba(0, 0, 0, 0.35);
-      }
-    }
-
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    body {
-      font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 28px; }
-
-    /* ===== Top bar ===== */
-    .nav {
-      position: sticky; top: 0; z-index: 10;
-      backdrop-filter: saturate(140%) blur(8px);
-      background: color-mix(in oklab, var(--bg) 80%, transparent);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 0;
-    }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink); }
-    .brand-mark {
-      width: 26px; height: 26px; border-radius: 7px; background: var(--ink); color: #fff;
-      display: grid; place-items: center; font-family: "Fraunces", serif; font-weight: 700;
-    }
-    .nav-links { display: flex; gap: 22px; font-size: 14px; color: var(--text-2); }
-    .nav-links a { color: inherit; text-decoration: none; }
-    .nav-links a:hover { color: var(--ink); }
-    @media (max-width: 720px) { .nav-links { display: none; } }
-
-    /* ===== Hero ===== */
-    .hero { padding: 64px 0 24px; }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 12px; border-radius: 999px;
-      background: var(--accent-2); color: var(--accent);
-      font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;
-    }
-    .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-
-    h1 {
-      font-family: "Fraunces", Georgia, serif;
-      font-weight: 600;
-      font-size: clamp(36px, 5.2vw, 64px);
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-      color: var(--ink);
-      margin: 18px 0 14px;
-    }
-    .lede {
-      font-size: clamp(16px, 1.6vw, 19px);
-      color: var(--text-2);
-      max-width: 720px;
-    }
-    .meta {
-      margin-top: 22px;
-      display: flex; flex-wrap: wrap; gap: 8px;
-    }
-    .chip {
-      padding: 6px 12px; border-radius: 999px;
-      background: var(--panel); border: 1px solid var(--border);
-      font-size: 12.5px; color: var(--text-2);
-    }
-    .chip strong { color: var(--ink); font-weight: 600; }
-
-    .cta-row { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
-    .cta {
-      display: inline-flex; align-items: center; gap: 10px;
-      padding: 12px 20px; border-radius: 10px;
-      font-weight: 600; font-size: 14px; text-decoration: none;
-      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
-    }
-    .cta.primary {
-      background: var(--ink); color: #fff; border: 1px solid var(--ink);
-    }
-    .cta.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(30,39,97,0.25); }
-    .cta.secondary {
-      background: var(--panel); color: var(--ink); border: 1px solid var(--border);
-    }
-    .cta.secondary:hover { background: var(--panel-alt); }
-    .cta .arrow { font-family: "Fraunces", serif; }
-
-    /* ===== Diagram card ===== */
-    section.diagram {
-      padding: 28px 0 24px;
-    }
-    .diagram-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px 18px 8px;
-      overflow: hidden;
-    }
-    .diagram-card svg {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    /* legend below the diagram */
-    .legend {
-      display: flex; flex-wrap: wrap; gap: 18px;
-      padding: 14px 6px 6px;
-      font-size: 12.5px;
-      color: var(--text-2);
-      border-top: 1px solid var(--border);
-      margin-top: 8px;
-    }
-    .legend .item { display: inline-flex; align-items: center; gap: 8px; }
-    .legend .swatch { width: 22px; height: 3px; border-radius: 2px; background: var(--rail); }
-    .legend .swatch.accent { background: var(--accent); height: 3px; }
-
-    /* SVG hoverable groups */
-    .node rect.body {
-      transition: filter .18s ease, transform .18s ease;
-      transform-box: fill-box; transform-origin: center;
-    }
-    .node:hover rect.body {
-      filter: drop-shadow(0 6px 14px rgba(30, 39, 97, 0.15));
-    }
-
-    /* ===== Tiers section ===== */
-    section.tiers { padding: 56px 0 24px; }
-    .section-head {
-      display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
-      margin-bottom: 28px;
-    }
-    .section-head h2 {
-      font-family: "Fraunces", Georgia, serif; font-weight: 600;
-      font-size: clamp(26px, 3vw, 34px);
-      letter-spacing: -0.015em;
-      color: var(--ink);
-      margin: 0;
-    }
-    .section-head .hint { color: var(--muted); font-size: 14px; }
-
-    .tier-grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 18px;
-    }
-    .tier {
-      grid-column: span 12;
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px 22px 20px;
-      position: relative;
-      box-shadow: var(--shadow);
-    }
-    @media (min-width: 760px) {
-      .tier { grid-column: span 6; }
-    }
-    @media (min-width: 1080px) {
-      .tier.span-4 { grid-column: span 4; }
-      .tier.span-6 { grid-column: span 6; }
-      .tier.span-8 { grid-column: span 8; }
-      .tier.span-12 { grid-column: span 12; }
-    }
-    .tier-tag {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
-      color: var(--muted); font-weight: 700;
-    }
-    .tier-tag .bar {
-      display: inline-block; width: 18px; height: 2px; background: var(--accent);
-    }
-    .tier h3 {
-      font-family: "Fraunces", Georgia, serif; font-weight: 600;
-      font-size: 22px; letter-spacing: -0.01em; color: var(--ink);
-      margin: 8px 0 8px;
-    }
-    .tier p { color: var(--text-2); margin: 0 0 12px; font-size: 15px; }
-    .tier ul {
-      list-style: none; padding: 0; margin: 8px 0 0;
-      display: flex; flex-wrap: wrap; gap: 6px;
-    }
-    .tier ul li {
-      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px; color: var(--ink-soft);
-      padding: 4px 9px; border-radius: 6px;
-      background: var(--panel-alt);
-      border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent);
-    }
-
-    /* protocol callout */
-    .protocol {
-      margin-top: 18px;
-      background: var(--accent-2);
-      border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
-      border-radius: var(--radius);
-      padding: 18px 22px;
-      display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
-    }
-    .protocol b { color: var(--ink); font-family: "Fraunces", Georgia, serif; font-size: 18px; font-weight: 600; }
-    .protocol .endpoints { display: flex; flex-wrap: wrap; gap: 6px; }
-    .protocol code {
-      font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 12.5px; color: var(--accent);
-      background: var(--panel); border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
-      padding: 3px 8px; border-radius: 6px;
-    }
-
-    /* ===== Footer ===== */
-    footer {
-      margin-top: 72px;
-      padding: 28px 0 48px;
-      border-top: 1px solid var(--border);
-      color: var(--muted); font-size: 13px;
-      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-    }
-    footer a { color: var(--text-2); text-decoration: none; }
-    footer a:hover { color: var(--ink); }
-
-    /* ===== Attribution panel ===== */
-    section.attribution { padding: 64px 0 8px; }
-    .attribution-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 36px 40px;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 32px; flex-wrap: wrap;
-    }
-    .attribution-card .text {
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .attribution-card .label {
-      font-size: 12px; font-weight: 600; letter-spacing: 1.2px;
-      text-transform: uppercase; color: var(--accent);
-    }
-    .attribution-card .name {
-      font-family: "Fraunces", Georgia, serif;
-      font-size: clamp(22px, 2.4vw, 30px);
-      font-weight: 600; color: var(--ink); line-height: 1.2;
-    }
-    .attribution-card .desc {
-      color: var(--text-2); font-size: 14px; max-width: 52ch;
-    }
-    .attribution-card a.logo-link {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 16px 24px; border-radius: 12px;
-      background: var(--panel-alt); border: 1px solid var(--border);
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-    .attribution-card a.logo-link:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(30, 39, 97, 0.12);
-    }
-    .attribution-card a.logo-link img {
-      height: 72px; width: auto; display: block;
-    }
-    @media (max-width: 640px) {
-      .attribution-card { padding: 28px; flex-direction: column; align-items: flex-start; }
-      .attribution-card a.logo-link img { height: 56px; }
-    }
-  </style>
-</head>
-<body>
-
-  <header class="nav">
+<BaseLayout title={title} description={description} bodyClass={"architecture"}>
+<header class="nav">
     <div class="wrap nav-inner">
       <a class="brand" href="#top">
         <span class="brand-mark">I</span>
@@ -329,8 +17,8 @@
         <a href="#diagram">Architecture</a>
         <a href="#tiers">Layers</a>
         <a href="#protocol">Protocol</a>
-        <a href="transaction.html">Transaction</a>
-        <a href="transaction_with_payment.html">Transaction + Payment</a>
+        <a href="/overview/transaction/">Transaction</a>
+        <a href="/overview/transaction-with-payment/">Transaction + Payment</a>
       </nav>
     </div>
   </header>
@@ -351,8 +39,8 @@
         <span class="chip">Beckn Protocol</span>
       </div>
       <div class="cta-row">
-        <a class="cta primary" href="transaction.html">Trade × Logistics walk-through <span class="arrow">→</span></a>
-        <a class="cta primary" href="transaction_with_payment.html">Trade × Payment × Logistics walk-through <span class="arrow">→</span></a>
+        <a class="cta primary" href="/overview/transaction/">Trade × Logistics walk-through <span class="arrow">→</span></a>
+        <a class="cta primary" href="/overview/transaction-with-payment/">Trade × Payment × Logistics walk-through <span class="arrow">→</span></a>
         <a class="cta secondary" href="#diagram">Skip to architecture</a>
       </div>
     </section>
@@ -592,7 +280,7 @@
           <span class="desc">The Employers' Association of Indonesia, supporting open commerce infrastructure for Indonesian businesses.</span>
         </div>
         <a class="logo-link" href="https://apindo.or.id" target="_blank" rel="noopener" aria-label="Visit APINDO">
-          <img src="apindo-logo.png" alt="APINDO" />
+          <img src="/apindo-logo.png" alt="APINDO" />
         </a>
       </div>
     </section>
@@ -602,6 +290,4 @@
       <span><a href="#top">Back to top ↑</a></span>
     </footer>
   </main>
-
-</body>
-</html>
+</BaseLayout>
