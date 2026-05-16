@@ -4,10 +4,12 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description: string;
+  canonicalUrl?: string;
   bodyClass?: string;
 }
 
-const { title, description, bodyClass } = Astro.props;
+const { title, description, canonicalUrl, bodyClass } = Astro.props;
+const resolvedCanonicalUrl = canonicalUrl ? new URL(canonicalUrl, Astro.site ?? Astro.url).toString() : Astro.url.toString();
 ---
 
 <!doctype html>
@@ -24,6 +26,9 @@ const { title, description, bodyClass } = Astro.props;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={resolvedCanonicalUrl} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href={resolvedCanonicalUrl} />
     <slot name="head" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

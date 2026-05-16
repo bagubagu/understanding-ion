@@ -1,13 +1,23 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-
-const title = 'ION Network';
-const description = 'ION Network architecture and transaction walkthroughs.';
+const destination = '/overview/';
 ---
 
-<BaseLayout title={title} description={description}>
-  <meta slot="head" http-equiv="refresh" content="0; url=/overview/" />
-  <main>
-    <p><a href="/overview/">Go to the ION Network overview.</a></p>
-  </main>
-</BaseLayout>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting to ION Network overview…</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={destination} />
+    <meta http-equiv="refresh" content={`0; url=${destination}`} />
+    <script>
+      window.location.replace('/overview/');
+    </script>
+  </head>
+  <body>
+    <p>
+      Redirecting to <a href={destination}>the ION Network overview</a>…
+    </p>
+  </body>
+</html>
