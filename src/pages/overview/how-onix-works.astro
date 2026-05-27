@@ -1,0 +1,902 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/how-onix-works.css';
+
+const title = "How ONIX Works — A Field Guide · ION Network";
+const description = "A working tour of beckn-ONIX, the Beckn protocol v2.0 adapter: what moves where, and why — across modules, pipeline, plugins, deployment, and observability.";
+---
+
+<BaseLayout title={title} description={description} bodyClass={"onix"}>
+  <link
+    slot="head"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <nav class="top">
+    <div class="inner">
+      <div class="brand">how <span class="dot">●</span> onix works</div>
+      <div class="links">
+        <a href="/overview/"><span class="n">00</span>overview</a>
+        <a href="#picture"><span class="n">01</span>picture</a>
+        <a href="#anatomy"><span class="n">02</span>anatomy</a>
+        <a href="#modules"><span class="n">03</span>modules</a>
+        <a href="#pipeline"><span class="n">04</span>pipeline</a>
+        <a href="#plugins"><span class="n">05</span>plugins</a>
+        <a href="#deploy"><span class="n">06</span>deploy</a>
+        <a href="#observe"><span class="n">07</span>observe</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="page">
+      <svg class="deco" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M20 0H0V20" fill="none" stroke="#c6bba0" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="380" height="380" fill="url(#grid)"/>
+        <circle cx="190" cy="190" r="140" fill="none" stroke="#c63d1a" stroke-width="0.8"/>
+        <circle cx="190" cy="190" r="100" fill="none" stroke="#161513" stroke-width="0.6"/>
+        <circle cx="190" cy="190" r="60"  fill="none" stroke="#234951" stroke-width="0.6"/>
+        <circle cx="190" cy="190" r="3"   fill="#c63d1a"/>
+        <line x1="0" y1="190" x2="380" y2="190" stroke="#161513" stroke-width="0.4" stroke-dasharray="2 4"/>
+        <line x1="190" y1="0" x2="190" y2="380" stroke="#161513" stroke-width="0.4" stroke-dasharray="2 4"/>
+        <text x="200" y="58" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">SCH-001 / v2.0</text>
+      </svg>
+
+      <div class="kicker smallcaps">A field guide · Beckn protocol v2.0 adapter</div>
+      <h1>
+        How <span class="acc ital">ONIX</span><br/>
+        <span class="ital">actually</span> works.
+      </h1>
+      <p class="lede">
+        Beckn-ONIX is the middleware that sits between a buyer or seller's
+        backend and the open Beckn network. It validates, signs, routes,
+        and publishes every message — and it does so through a plugin
+        pipeline you assemble yourself. This is a working tour of <em>what
+        moves where, and why</em>.
+      </p>
+
+      <div class="meta">
+        <div class="item">
+          <div class="v">v2.0</div>
+          <div class="l smallcaps">Beckn protocol</div>
+        </div>
+        <div class="item">
+          <div class="v">14+</div>
+          <div class="l smallcaps">Plugin slots</div>
+        </div>
+        <div class="item">
+          <div class="v">4</div>
+          <div class="l smallcaps">Module types</div>
+        </div>
+        <div class="item">
+          <div class="v">1</div>
+          <div class="l smallcaps">Process per node</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <section id="picture">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">01</span>
+        <span class="tag">The picture</span>
+      </div>
+      <h2>An <span class="ital">adapter</span>, not an app.</h2>
+      <p class="standfirst">
+        ONIX is not the buyer app and not the seller's backend. It is the
+        <em>protocol layer between them</em> — a stateless gateway that turns
+        private backend calls into signed, validated Beckn messages on a public
+        network, and turns inbound network messages back into clean calls for the
+        backend.
+      </p>
+
+      <figure>
+        <div class="frame">
+          <svg viewBox="0 0 1100 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beckn network architecture showing BAP and BPP backends connected through ONIX adapters">
+            <defs>
+              <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#c63d1a"/>
+              </marker>
+              <marker id="arrgrey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#234951"/>
+              </marker>
+              <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="0.8" fill="#c6bba0"/>
+              </pattern>
+            </defs>
+
+            <g>
+              <rect x="20" y="100" width="160" height="160" fill="none" stroke="#161513" stroke-width="1.2"/>
+              <rect x="20" y="100" width="160" height="22" fill="#161513"/>
+              <text x="100" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#f1ead8" letter-spacing="2">BUYER · BAP</text>
+              <text x="100" y="160" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#161513">Backend</text>
+              <text x="100" y="190" text-anchor="middle" font-family="Newsreader" font-size="12" fill="#7a6f5e">consumer app /</text>
+              <text x="100" y="205" text-anchor="middle" font-family="Newsreader" font-size="12" fill="#7a6f5e">aggregator</text>
+              <text x="100" y="232" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#c63d1a">private API</text>
+            </g>
+
+            <g>
+              <rect x="230" y="80" width="200" height="200" fill="#f1ead8" stroke="#c63d1a" stroke-width="1.4"/>
+              <rect x="230" y="80" width="200" height="22" fill="#c63d1a"/>
+              <text x="330" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#f1ead8" letter-spacing="2">ONIX · BAP-SIDE</text>
+              <text x="330" y="138" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#161513">Adapter</text>
+              <g font-family="JetBrains Mono" font-size="9" fill="#234951">
+                <rect x="248" y="155" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="286" y="170" text-anchor="middle">validateSign</text>
+                <rect x="336" y="155" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="374" y="170" text-anchor="middle">addRoute</text>
+                <rect x="248" y="185" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="286" y="200" text-anchor="middle">validateSchema</text>
+                <rect x="336" y="185" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="374" y="200" text-anchor="middle">sign</text>
+                <rect x="248" y="215" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="286" y="230" text-anchor="middle">publish</text>
+                <rect x="336" y="215" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="374" y="230" text-anchor="middle">storePayload</text>
+              </g>
+              <text x="330" y="265" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">: 8081</text>
+            </g>
+
+            <g>
+              <rect x="480" y="100" width="140" height="160" fill="url(#dots)" stroke="#234951" stroke-width="0.8" stroke-dasharray="3 3"/>
+              <text x="550" y="170" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#234951">network</text>
+              <text x="550" y="195" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#234951">gateway · registry</text>
+              <text x="550" y="212" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#234951">other participants</text>
+            </g>
+
+            <g>
+              <rect x="670" y="80" width="200" height="200" fill="#f1ead8" stroke="#c63d1a" stroke-width="1.4"/>
+              <rect x="670" y="80" width="200" height="22" fill="#c63d1a"/>
+              <text x="770" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#f1ead8" letter-spacing="2">ONIX · BPP-SIDE</text>
+              <text x="770" y="138" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#161513">Adapter</text>
+              <g font-family="JetBrains Mono" font-size="9" fill="#234951">
+                <rect x="688" y="155" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="726" y="170" text-anchor="middle">validateSign</text>
+                <rect x="776" y="155" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="814" y="170" text-anchor="middle">validateSchema</text>
+                <rect x="688" y="185" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="726" y="200" text-anchor="middle">checkPolicy</text>
+                <rect x="776" y="185" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="814" y="200" text-anchor="middle">addRoute</text>
+                <rect x="688" y="215" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="726" y="230" text-anchor="middle">storePayload</text>
+                <rect x="776" y="215" width="76" height="22" fill="none" stroke="#234951" stroke-width="0.6"/>
+                <text x="814" y="230" text-anchor="middle">signAck</text>
+              </g>
+              <text x="770" y="265" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">: 8081</text>
+            </g>
+
+            <g>
+              <rect x="920" y="100" width="160" height="160" fill="none" stroke="#161513" stroke-width="1.2"/>
+              <rect x="920" y="100" width="160" height="22" fill="#161513"/>
+              <text x="1000" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#f1ead8" letter-spacing="2">SELLER · BPP</text>
+              <text x="1000" y="160" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#161513">Backend</text>
+              <text x="1000" y="190" text-anchor="middle" font-family="Newsreader" font-size="12" fill="#7a6f5e">provider /</text>
+              <text x="1000" y="205" text-anchor="middle" font-family="Newsreader" font-size="12" fill="#7a6f5e">merchant platform</text>
+              <text x="1000" y="232" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#c63d1a">private API</text>
+            </g>
+
+            <line x1="180" y1="160" x2="228" y2="160" stroke="#c63d1a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="430" y1="160" x2="478" y2="160" stroke="#c63d1a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="620" y1="160" x2="668" y2="160" stroke="#c63d1a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="870" y1="160" x2="918" y2="160" stroke="#c63d1a" stroke-width="1.5" marker-end="url(#arr)"/>
+            <text x="540" y="148" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="2">search · select · init · confirm</text>
+
+            <line x1="228" y1="200" x2="180" y2="200" stroke="#234951" stroke-width="1.5" marker-end="url(#arrgrey)"/>
+            <line x1="478" y1="200" x2="430" y2="200" stroke="#234951" stroke-width="1.5" marker-end="url(#arrgrey)"/>
+            <line x1="668" y1="200" x2="620" y2="200" stroke="#234951" stroke-width="1.5" marker-end="url(#arrgrey)"/>
+            <line x1="918" y1="200" x2="870" y2="200" stroke="#234951" stroke-width="1.5" marker-end="url(#arrgrey)"/>
+            <text x="540" y="220" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#234951" letter-spacing="2">on_search · on_select · on_init · on_confirm</text>
+
+            <text x="20" y="40" font-family="Fraunces" font-style="italic" font-size="16" fill="#161513">fig.01</text>
+            <text x="20" y="60" font-family="JetBrains Mono" font-size="10" fill="#7a6f5e">end-to-end participants</text>
+          </svg>
+        </div>
+        <figcaption>
+          <span class="fig">fig. 01</span>
+          <span class="cap">A single Beckn transaction crosses four boundaries — two private, two public — and ONIX is the translator at each network edge.</span>
+        </figcaption>
+      </figure>
+
+      <p>
+        Each ONIX node speaks two languages. To the backend it speaks HTTP-and-JSON
+        in whatever shape the operator prefers. To the network it speaks the
+        Beckn v2.0 protocol — strictly signed, strictly typed, strictly versioned.
+        Everything in this document is about <span class="ital">how it negotiates between those two sides</span>.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="anatomy">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">02</span>
+        <span class="tag">Anatomy</span>
+      </div>
+      <h2>Four layers, <span class="ital">one process.</span></h2>
+
+      <div class="with-marginalia">
+        <div class="body">
+
+          <p class="standfirst">
+            ONIX is a single Go process. Inside it, every request descends through
+            four layers before doing real work: the HTTP server, the module router,
+            the handler, and the step pipeline that does the actual protocol
+            translation.
+          </p>
+
+          <figure>
+            <div class="frame">
+              <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Internal layered architecture of an ONIX adapter">
+                <defs>
+                  <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#f1ead8"/>
+                    <stop offset="1" stop-color="#e8dec5"/>
+                  </linearGradient>
+                </defs>
+
+                <rect x="20" y="20" width="860" height="420" fill="none" stroke="#161513" stroke-width="0.8" stroke-dasharray="4 4"/>
+                <text x="35" y="38" font-family="JetBrains Mono" font-size="10" fill="#161513" letter-spacing="2">PROCESS · beckn-onix adapter</text>
+
+                <rect x="60" y="60" width="780" height="70" fill="url(#lg)" stroke="#234951" stroke-width="0.8"/>
+                <text x="74" y="80" font-family="JetBrains Mono" font-size="10" fill="#234951" letter-spacing="2">L1 · HTTP SERVER</text>
+                <text x="74" y="108" font-family="Fraunces" font-style="italic" font-size="20" fill="#161513">net/http on :8081</text>
+                <text x="500" y="108" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">read · write · idle timeouts · TLS termination</text>
+
+                <rect x="60" y="145" width="780" height="80" fill="url(#lg)" stroke="#234951" stroke-width="0.8"/>
+                <text x="74" y="165" font-family="JetBrains Mono" font-size="10" fill="#234951" letter-spacing="2">L2 · MODULE ROUTER</text>
+                <text x="74" y="195" font-family="Fraunces" font-style="italic" font-size="20" fill="#161513">path → module</text>
+                <g font-family="JetBrains Mono" font-size="10" fill="#161513">
+                  <rect x="400" y="178" width="130" height="22" fill="#f1ead8" stroke="#c6bba0"/>
+                  <text x="465" y="193" text-anchor="middle">/bap/caller/*</text>
+                  <rect x="540" y="178" width="130" height="22" fill="#f1ead8" stroke="#c6bba0"/>
+                  <text x="605" y="193" text-anchor="middle">/bap/receiver/*</text>
+                  <rect x="400" y="200" width="130" height="22" fill="#f1ead8" stroke="#c6bba0"/>
+                  <text x="465" y="215" text-anchor="middle">/bpp/receiver/*</text>
+                  <rect x="540" y="200" width="130" height="22" fill="#f1ead8" stroke="#c6bba0"/>
+                  <text x="605" y="215" text-anchor="middle">/bpp/caller/*</text>
+                </g>
+
+                <rect x="60" y="240" width="780" height="80" fill="url(#lg)" stroke="#234951" stroke-width="0.8"/>
+                <text x="74" y="260" font-family="JetBrains Mono" font-size="10" fill="#234951" letter-spacing="2">L3 · HANDLER</text>
+                <text x="74" y="290" font-family="Fraunces" font-style="italic" font-size="20" fill="#161513">stdHandler</text>
+                <text x="74" y="310" font-family="JetBrains Mono" font-size="10" fill="#7a6f5e">loads plugins · owns role (bap|bpp) · owns subscriberId · spans &amp; metrics</text>
+
+                <rect x="60" y="335" width="780" height="90" fill="#161513" stroke="#161513"/>
+                <text x="74" y="355" font-family="JetBrains Mono" font-size="10" fill="#e6b8a8" letter-spacing="2">L4 · STEP PIPELINE</text>
+                <g font-family="JetBrains Mono" font-size="10" fill="#f1ead8">
+                  <rect x="74"  y="370" width="115" height="44" fill="none" stroke="#e6b8a8" stroke-width="0.8"/>
+                  <text x="131" y="390" text-anchor="middle">validateSign</text>
+                  <text x="131" y="404" text-anchor="middle" font-size="9" fill="#e6b8a8">step ① ●</text>
+
+                  <rect x="200" y="370" width="115" height="44" fill="none" stroke="#e6b8a8" stroke-width="0.8"/>
+                  <text x="257" y="390" text-anchor="middle">addRoute</text>
+                  <text x="257" y="404" text-anchor="middle" font-size="9" fill="#e6b8a8">step ② ●</text>
+
+                  <rect x="326" y="370" width="115" height="44" fill="none" stroke="#e6b8a8" stroke-width="0.8"/>
+                  <text x="383" y="390" text-anchor="middle">validateSchema</text>
+                  <text x="383" y="404" text-anchor="middle" font-size="9" fill="#e6b8a8">step ③ ●</text>
+
+                  <rect x="452" y="370" width="115" height="44" fill="none" stroke="#e6b8a8" stroke-width="0.8"/>
+                  <text x="509" y="390" text-anchor="middle">sign</text>
+                  <text x="509" y="404" text-anchor="middle" font-size="9" fill="#e6b8a8">step ④ ●</text>
+
+                  <rect x="578" y="370" width="115" height="44" fill="none" stroke="#e6b8a8" stroke-width="0.8"/>
+                  <text x="635" y="390" text-anchor="middle">publish</text>
+                  <text x="635" y="404" text-anchor="middle" font-size="9" fill="#e6b8a8">step ⑤ ●</text>
+
+                  <rect x="704" y="370" width="115" height="44" fill="none" stroke="#c63d1a" stroke-width="1"/>
+                  <text x="761" y="390" text-anchor="middle" fill="#e6b8a8">···</text>
+                  <text x="761" y="404" text-anchor="middle" font-size="9" fill="#c63d1a">user-defined</text>
+                </g>
+
+                <line x1="40" y1="60"  x2="40" y2="425" stroke="#c63d1a" stroke-width="1" stroke-dasharray="2 3"/>
+                <polygon points="40,425 36,418 44,418" fill="#c63d1a"/>
+                <text x="50" y="240" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" transform="rotate(-90 50 240)" letter-spacing="2">REQUEST DESCENDS</text>
+              </svg>
+            </div>
+            <figcaption>
+              <span class="fig">fig. 02</span>
+              <span class="cap">Each layer's only job is to pick the right thing in the next layer down. Steps do the actual work.</span>
+            </figcaption>
+          </figure>
+
+          <h3>What each layer owns</h3>
+          <p>
+            <strong>L1 — HTTP server</strong> is just <code>net/http</code>. It enforces
+            read, write, and idle timeouts and otherwise stays out of the way.
+          </p>
+          <p>
+            <strong>L2 — Module router</strong> matches the URL path prefix to a module.
+            A module is bound to one of four well-known shapes: <code>bapTxnCaller</code>,
+            <code>bapTxnReceiver</code>, <code>bppTxnReceiver</code>, <code>bppTxnCaller</code>.
+            One adapter process may host any combination.
+          </p>
+          <p>
+            <strong>L3 — Handler</strong> is the only handler type that ships:
+            <code>stdHandler</code>. It loads the plugins declared in config,
+            attaches middleware, opens an OpenTelemetry span, and hands the
+            request to the step pipeline.
+          </p>
+          <p>
+            <strong>L4 — Step pipeline</strong> is where everything interesting
+            happens. Steps run in declared order. The first step that errors
+            aborts the pipeline and produces a signed NACK.
+          </p>
+
+        </div>
+
+        <aside>
+          <div class="label">source · go</div>
+          <span class="path">cmd/adapter/main.go</span>
+          <span class="path">core/module/module.go</span>
+          <span class="path">core/module/handler/stdHandler.go</span>
+          <span class="path">core/module/handler/config.go</span>
+          <span class="path">pkg/plugin/manager.go</span>
+        </aside>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section id="modules">
+    <div class="page">
+      <div class="head">
+        <span class="num">03</span>
+        <span class="tag">Modules · the four shapes</span>
+      </div>
+      <h2>Who's <span class="ital">calling</span>, who's <span class="ital">receiving</span>.</h2>
+      <p class="standfirst">
+        A node may play one role (BAP or BPP) or both. Each role splits in
+        two directions — outbound calls into the network and inbound calls
+        from the network. That gives four module shapes. Pick the ones
+        relevant to the deployment.
+      </p>
+
+      <div class="matrix">
+
+        <div class="cell">
+          <div class="role">BAP · outbound</div>
+          <div class="id">bapTxnCaller</div>
+          <div class="desc">
+            The buyer-side initiator. Receives a private call from the
+            buyer's own backend and turns it into a signed Beckn request
+            out to the network gateway or directly to a known BPP.
+          </div>
+          <div class="ex">verbs &nbsp;<span>search · select · init · confirm · status · cancel · update · rating · support · track</span></div>
+        </div>
+
+        <div class="cell">
+          <div class="role">BAP · inbound</div>
+          <div class="id">bapTxnReceiver</div>
+          <div class="desc">
+            The buyer-side callback sink. Receives asynchronous responses
+            from BPPs, validates their signatures and schemas, and routes
+            them back to the buyer's backend (or onto a queue).
+          </div>
+          <div class="ex">verbs &nbsp;<span>on_search · on_select · on_init · on_confirm · on_status · on_cancel · on_update · on_rating · on_support · on_track</span></div>
+        </div>
+
+        <div class="cell">
+          <div class="role">BPP · inbound</div>
+          <div class="id">bppTxnReceiver</div>
+          <div class="desc">
+            The seller-side request sink. Receives signed Beckn requests
+            from BAPs, validates them, checks policy, and hands them off
+            to the seller's backend or a fulfilment queue.
+          </div>
+          <div class="ex">verbs &nbsp;<span>search · select · init · confirm · status · cancel · update · rating · support · track</span></div>
+        </div>
+
+        <div class="cell">
+          <div class="role">BPP · outbound</div>
+          <div class="id">bppTxnCaller</div>
+          <div class="desc">
+            The seller-side responder. Receives a private callback from
+            the seller's backend with results, then signs and sends them
+            back to the originating BAP as a Beckn callback.
+          </div>
+          <div class="ex">verbs &nbsp;<span>on_search · on_select · on_init · on_confirm · on_status · on_cancel · on_update · on_rating · on_support · on_track</span></div>
+        </div>
+
+      </div>
+
+      <p>
+        <em>The pattern is symmetric.</em> For every verb on the
+        <code>Caller</code> side there is a matching <code>on_*</code>
+        verb on the <code>Receiver</code> side. The two sides do not
+        block on each other — Beckn is asynchronous by design, and the
+        callback may arrive seconds or minutes later from a different
+        participant.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="pipeline">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">04</span>
+        <span class="tag">The pipeline</span>
+      </div>
+      <h2>One request, <span class="ital">step by step.</span></h2>
+
+      <div class="with-marginalia">
+        <div class="body">
+          <p class="standfirst">
+            Walk through what happens when a buyer's backend calls
+            <code>POST /bap/caller/search</code>. Click each stage to expand.
+          </p>
+
+          <div class="pipeline">
+            <div class="track">
+              <div class="step active" data-step="0">
+                <div class="num">STEP 01</div>
+                <div class="name">validateSign</div>
+                <div class="who">SignValidator</div>
+              </div>
+              <div class="step" data-step="1">
+                <div class="num">STEP 02</div>
+                <div class="name">addRoute</div>
+                <div class="who">Router</div>
+              </div>
+              <div class="step" data-step="2">
+                <div class="num">STEP 03</div>
+                <div class="name">validateSchema</div>
+                <div class="who">SchemaValidator</div>
+              </div>
+              <div class="step" data-step="3">
+                <div class="num">STEP 04</div>
+                <div class="name">sign</div>
+                <div class="who">Signer · KeyManager</div>
+              </div>
+              <div class="step" data-step="4">
+                <div class="name">publish<br/>or forward</div>
+                <div class="num">STEP 05</div>
+                <div class="who">Publisher · http</div>
+              </div>
+            </div>
+            <div class="detail" id="stepDetail"></div>
+          </div>
+
+          <h3>Reading the order</h3>
+          <p>
+            Step order is declared in the handler config and matters. The
+            most common ordering is: verify what came in
+            (<code>validateSign</code> → <code>validateSchema</code>),
+            decide where it goes (<code>addRoute</code>), prepare what
+            goes out (<code>sign</code>), and finally hand it off
+            (<code>publish</code> or HTTP forward). On the BPP receiver
+            side you typically see <code>checkPolicy</code> inserted between
+            schema validation and routing — a place to apply manifest-driven
+            allow/deny rules before doing real work.
+          </p>
+          <p>
+            If any step returns an error the pipeline aborts. The handler
+            composes a Beckn NACK, signs it with the
+            <code>ackSigner</code> when configured, and returns it
+            synchronously with an appropriate HTTP status. Every step
+            also emits OpenTelemetry metrics —
+            <code>onix_step_executions_total</code>,
+            <code>onix_step_execution_duration_seconds</code>,
+            and <code>onix_step_errors_total</code> — labelled with
+            the module, action, and step name.
+          </p>
+
+          <pre><span class="c"># a typical bapTxnCaller handler — config/local-simple.yaml</span>
+<span class="k">modules:</span>
+  - <span class="k">name:</span> <span class="s">bapTxnCaller</span>
+    <span class="k">path:</span> <span class="s">/bap/caller/</span>
+    <span class="k">handler:</span>
+      <span class="k">type:</span> <span class="s">std</span>
+      <span class="k">role:</span> <span class="s">bap</span>
+      <span class="k">plugins:</span>
+        <span class="k">router:</span>      &lbrace; <span class="k">id:</span> <span class="s">router</span>,        <span class="k">config:</span> &lbrace; <span class="k">routingConfig:</span> <span class="s">./config/local-routing.yaml</span> &rbrace; &rbrace;
+        <span class="k">schemaValidator:</span> &lbrace; <span class="k">id:</span> <span class="s">schemav2validator</span>, <span class="k">config:</span> &lbrace; <span class="k">type:</span> <span class="s">url</span>, <span class="k">location:</span> <span class="s">https://.../beckn.yaml</span> &rbrace; &rbrace;
+        <span class="k">signer:</span>      &lbrace; <span class="k">id:</span> <span class="s">signer</span> &rbrace;
+        <span class="k">keyManager:</span>  &lbrace; <span class="k">id:</span> <span class="s">simplekeymanager</span> &rbrace;
+        <span class="k">cache:</span>       &lbrace; <span class="k">id:</span> <span class="s">cache</span>, <span class="k">config:</span> &lbrace; <span class="k">addr:</span> <span class="s">localhost:6379</span> &rbrace; &rbrace;
+      <span class="k">steps:</span>
+        - <span class="s">validateSchema</span>
+        - <span class="s">addRoute</span>
+        - <span class="s">sign</span>
+        - <span class="s">publish</span></pre>
+
+        </div>
+
+        <aside>
+          <div class="label">source · go</div>
+          <span class="path">core/module/handler/stdHandler.go</span>
+          <span class="path">core/module/handler/step_metrics.go</span>
+          <span class="path">pkg/plugin/definition/signer.go</span>
+          <span class="path">pkg/plugin/definition/signvalidator.go</span>
+          <span class="path">pkg/plugin/definition/router.go</span>
+          <div class="label" style="margin-top:18px;">spec</div>
+          <span class="path">beckn/protocol-specifications-v2 · api/v2.0.0/beckn.yaml</span>
+        </aside>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section id="plugins">
+    <div class="page">
+      <div class="head">
+        <span class="num">05</span>
+        <span class="tag">Plugin library</span>
+      </div>
+      <h2>Plugins are the <span class="ital">verbs</span> of the adapter.</h2>
+      <p class="standfirst">
+        Every job a handler can do is delegated to a plugin. Plugins are
+        loaded as Go <code>.so</code> files at startup, slotted into named
+        positions, and used by the steps. ONIX ships a working
+        implementation for each slot; replace any of them without
+        touching ONIX itself.
+      </p>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">A</span>
+          <span class="name">Identity &amp; signing</span>
+          <span class="why">Ed25519 · key lifecycle · ack signatures</span>
+        </div>
+        <div class="plug-grid">
+          <div class="p"><div class="nm">Signer</div><div class="dn">Signs outbound requests and ACKs with the participant's private key.</div></div>
+          <div class="p"><div class="nm">SignValidator</div><div class="dn">Verifies the <code>Authorization</code> header on inbound requests and ACKs.</div></div>
+          <div class="p"><div class="nm">KeyManager</div><div class="dn">Manages key material. <code>simplekeymanager</code> for dev, <code>keymanager</code> for Vault, <code>secretskeymanager</code> for GCP/AWS secret stores.</div></div>
+          <div class="p"><div class="nm">Registry</div><div class="dn">Looks up other participants' public keys via the Beckn registry.</div></div>
+        </div>
+      </div>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">B</span>
+          <span class="name">Validation &amp; policy</span>
+          <span class="why">schemas · manifests · open-policy</span>
+        </div>
+        <div class="plug-grid">
+          <div class="p"><div class="nm">SchemaValidator</div><div class="dn">Validates against the Beckn v2.0 OpenAPI spec. <code>schemav2validator</code> can also pull domain-specific extended schemas via <code>@context</code>.</div></div>
+          <div class="p"><div class="nm">ManifestLoader</div><div class="dn">Loads the participant's published manifest (capabilities, schema versions, policies).</div></div>
+          <div class="p"><div class="nm">PolicyChecker</div><div class="dn">Evaluates manifest-derived policy rules against each message — allow, deny, or annotate.</div></div>
+          <div class="p"><div class="nm">PayloadTransformer</div><div class="dn">Reshapes the body between backend conventions and Beckn shapes via a JSONata-style mapping.</div></div>
+        </div>
+      </div>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">C</span>
+          <span class="name">Routing &amp; transport</span>
+          <span class="why">where the message goes next</span>
+        </div>
+        <div class="plug-grid">
+          <div class="p"><div class="nm">Router</div><div class="dn">Picks the next hop from declarative routing rules — by domain, version, endpoint, or dynamic <code>bpp_uri</code>.</div></div>
+          <div class="p"><div class="nm">Publisher</div><div class="dn">Hands messages to a queue — Pub/Sub or RabbitMQ — for asynchronous downstream processing.</div></div>
+          <div class="p"><div class="nm">TransportWrapper</div><div class="dn">Wraps the outbound <code>http.RoundTripper</code> to add retries, observability, or custom headers.</div></div>
+        </div>
+      </div>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">D</span>
+          <span class="name">Memory</span>
+          <span class="why">caches · stateful foundations</span>
+        </div>
+        <div class="plug-grid">
+          <div class="p"><div class="nm">Cache</div><div class="dn">Backed by Redis. Used by KeyManager, PayloadStore, and any plugin that needs short-lived state. ONIX itself remains stateless.</div></div>
+          <div class="p"><div class="nm">PayloadStore</div><div class="dn">Records every inbound request indexed by <code>message_id</code> and <code>transaction_id</code>. The foundation under stateful plugins.</div></div>
+        </div>
+      </div>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">E</span>
+          <span class="name">Pipeline extension</span>
+          <span class="why">your own logic, slotted in</span>
+        </div>
+        <div class="plug-grid">
+          <div class="p"><div class="nm">Step</div><div class="dn">Adds a custom processing step into the named pipeline order. Any plugin implementing the <code>Step</code> interface can be referenced from <code>steps:</code>.</div></div>
+          <div class="p"><div class="nm">Middleware</div><div class="dn">Standard Go <code>http.Handler</code> wrappers. Runs before the pipeline — auth, rate limiting, logging.</div></div>
+          <div class="p"><div class="nm">OtelSetup</div><div class="dn">Wires the MeterProvider, TracerProvider, and LogProvider so the whole adapter emits a single coherent OTLP stream.</div></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section id="deploy">
+    <div class="page">
+      <div class="head">
+        <span class="num">06</span>
+        <span class="tag">Deployment</span>
+      </div>
+      <h2>One process — <span class="ital">or two, or many.</span></h2>
+      <p class="standfirst">
+        The same binary serves every deployment. What changes is the set
+        of modules declared in the config file. Scale the role that needs
+        scaling; collapse both into one when the load is modest.
+      </p>
+
+      <div class="deploys">
+
+        <div class="d">
+          <div class="head">
+            <span class="name">Combined</span>
+            <span class="tag">single binary</span>
+          </div>
+          <div class="sub">
+            One adapter serves both buyer and seller traffic. Simplest to
+            run; ideal for small networks or single-org pilots.
+          </div>
+          <div class="mods">
+            <span class="m">bapTxnCaller</span>
+            <span class="m">bapTxnReceiver</span>
+            <span class="m">bppTxnReceiver</span>
+            <span class="m">bppTxnCaller</span>
+          </div>
+        </div>
+
+        <div class="d">
+          <div class="head">
+            <span class="name">BAP-only</span>
+            <span class="tag">buyer scale-out</span>
+          </div>
+          <div class="sub">
+            Dedicated buyer adapter. Scale buyer-side traffic independently
+            and isolate failure domains.
+          </div>
+          <div class="mods">
+            <span class="m">bapTxnCaller</span>
+            <span class="m">bapTxnReceiver</span>
+            <span class="m off">bppTxnReceiver</span>
+            <span class="m off">bppTxnCaller</span>
+          </div>
+        </div>
+
+        <div class="d">
+          <div class="head">
+            <span class="name">BPP-only</span>
+            <span class="tag">seller scale-out</span>
+          </div>
+          <div class="sub">
+            Dedicated seller adapter. Tune capacity to fulfilment load
+            and apply seller-specific policy without disturbing buyer
+            paths.
+          </div>
+          <div class="mods">
+            <span class="m off">bapTxnCaller</span>
+            <span class="m off">bapTxnReceiver</span>
+            <span class="m">bppTxnReceiver</span>
+            <span class="m">bppTxnCaller</span>
+          </div>
+        </div>
+
+      </div>
+
+      <p>
+        Beyond the role split, the same binary supports local-development
+        shapes that swap heavy dependencies for embedded ones —
+        <code>simplekeymanager</code> instead of Vault,
+        in-process publishers instead of RabbitMQ, file-based schemas
+        instead of remote ones. Production configs simply re-bind those
+        slots to real backends. <em>Nothing about the pipeline changes.</em>
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="observe">
+    <div class="page">
+      <div class="head">
+        <span class="num">07</span>
+        <span class="tag">Observability</span>
+      </div>
+      <h2>Two consumers, <span class="ital">one signal stream.</span></h2>
+
+      <div class="with-marginalia">
+        <div class="body">
+
+          <p class="standfirst">
+            Every node emits a single OpenTelemetry stream — metrics,
+            traces, audit logs — over OTLP. A companion collector
+            deployed beside the adapter splits that stream into two
+            pipelines: one for the node operator, one for the network
+            observer.
+          </p>
+
+          <figure>
+            <div class="frame">
+              <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Observability architecture showing companion collector splitting telemetry into node and network pipelines">
+                <defs>
+                  <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M0 0 L10 5 L0 10 z" fill="#c63d1a"/>
+                  </marker>
+                  <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                    <path d="M0 0 L10 5 L0 10 z" fill="#234951"/>
+                  </marker>
+                </defs>
+
+                <rect x="40" y="40" width="260" height="380" fill="#f1ead8" stroke="#161513" stroke-width="0.8"/>
+                <rect x="40" y="40" width="260" height="26" fill="#161513"/>
+                <text x="170" y="58" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#f1ead8" letter-spacing="2">ONIX · ADAPTER NODE</text>
+
+                <g font-family="Fraunces" font-size="14" font-style="italic" fill="#161513">
+                  <rect x="60" y="86" width="220" height="38" fill="none" stroke="#234951" stroke-width="0.6"/>
+                  <text x="170" y="110" text-anchor="middle">handler &amp; step metrics</text>
+                  <rect x="60" y="132" width="220" height="38" fill="none" stroke="#234951" stroke-width="0.6"/>
+                  <text x="170" y="156" text-anchor="middle">request &amp; cache traces</text>
+                  <rect x="60" y="178" width="220" height="38" fill="none" stroke="#234951" stroke-width="0.6"/>
+                  <text x="170" y="202" text-anchor="middle">PII-masked audit logs</text>
+                  <rect x="60" y="224" width="220" height="38" fill="none" stroke="#234951" stroke-width="0.6"/>
+                  <text x="170" y="248" text-anchor="middle">runtime + redis metrics</text>
+                  <rect x="60" y="270" width="220" height="38" fill="none" stroke="#234951" stroke-width="0.6"/>
+                  <text x="170" y="294" text-anchor="middle">plugin inventory gauge</text>
+                </g>
+
+                <text x="170" y="350" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">OTel SDK · scope = "beckn-onix"</text>
+                <text x="170" y="378" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="2">OTLP / gRPC</text>
+
+                <rect x="360" y="160" width="180" height="140" fill="#161513" stroke="#161513"/>
+                <text x="450" y="180" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e6b8a8" letter-spacing="2">COMPANION</text>
+                <text x="450" y="195" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e6b8a8" letter-spacing="2">COLLECTOR</text>
+                <text x="450" y="232" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#f1ead8">split</text>
+                <text x="450" y="270" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">one process per node</text>
+
+                <line x1="300" y1="230" x2="358" y2="230" stroke="#c63d1a" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+                <line x1="540" y1="200" x2="600" y2="160" stroke="#c63d1a" stroke-width="1.5" marker-end="url(#arr2)"/>
+                <rect x="600" y="100" width="260" height="130" fill="#f1ead8" stroke="#c63d1a" stroke-width="1"/>
+                <text x="730" y="118" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="2">NODE PIPELINE · full fidelity</text>
+                <text x="730" y="148" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#161513">Node operator</text>
+                <text x="730" y="178" text-anchor="middle" font-family="Newsreader" font-size="13" fill="#7a6f5e">Prometheus · Grafana ·</text>
+                <text x="730" y="196" text-anchor="middle" font-family="Newsreader" font-size="13" fill="#7a6f5e">Loki · Datadog · whatever</text>
+                <text x="730" y="218" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#234951">all metrics · all traces · all logs</text>
+
+                <line x1="540" y1="260" x2="600" y2="300" stroke="#234951" stroke-width="1.5" marker-end="url(#arr3)"/>
+                <rect x="600" y="290" width="260" height="130" fill="#f1ead8" stroke="#234951" stroke-width="1"/>
+                <text x="730" y="308" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#234951" letter-spacing="2">NETWORK PIPELINE · filtered</text>
+                <text x="730" y="338" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="22" fill="#161513">Network observer</text>
+                <text x="730" y="368" text-anchor="middle" font-family="Newsreader" font-size="13" fill="#7a6f5e">Network Orchestrator's</text>
+                <text x="730" y="386" text-anchor="middle" font-family="Newsreader" font-size="13" fill="#7a6f5e">shared collector</text>
+                <text x="730" y="408" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#234951">http_request_count · spans · plugin info</text>
+
+              </svg>
+            </div>
+            <figcaption>
+              <span class="fig">fig. 03</span>
+              <span class="cap">Neither consumer instruments the adapter separately; the split is collector configuration, not code.</span>
+            </figcaption>
+          </figure>
+
+          <p>
+            The node operator gets full-fidelity visibility into their own
+            adapter — every step's latency, every cache hit, every plugin
+            error — and can ship it to any OTLP backend they choose. The
+            network observer gets only what crosses node boundaries: an
+            http-request counter labelled by <code>sender.id</code> and
+            <code>recipient.id</code>, a stitched distributed trace where
+            the Beckn <code>transaction_id</code> becomes the trace ID,
+            and a plugin-inventory gauge that reveals which plugins each
+            node is actually running.
+          </p>
+          <p>
+            Audit logs are emitted with PII masked at the source. The
+            fields to mask are themselves configuration —
+            <code>config/audit-fields.yaml</code> — so the network
+            observer never receives anything sensitive even when the
+            node operator's pipeline does.
+          </p>
+
+        </div>
+
+        <aside>
+          <div class="label">source · go</div>
+          <span class="path">pkg/plugin/implementation/otelsetup/OBSERVABILITY.md</span>
+          <span class="path">pkg/telemetry/pluginMetrics.go</span>
+          <span class="path">pkg/telemetry/nodeInfo.go</span>
+          <span class="path">core/module/handler/handlerMetrics.go</span>
+          <div class="label" style="margin-top:18px;">config</div>
+          <span class="path">config/audit-fields.yaml</span>
+          <span class="path">install/network-observability/</span>
+        </aside>
+      </div>
+
+    </div>
+  </section>
+
+
+  <footer class="foot">
+    <div class="page">
+      <div class="big">
+        A protocol adapter is just <span class="rust ital">an opinion</span>
+        about what belongs inside, and what stays outside.
+      </div>
+      <div class="row">
+        <div>built on · beckn-protocol-specifications-v2 · api/v2.0.0/beckn.yaml</div>
+        <div>compiled · how-onix-works · v1</div>
+      </div>
+    </div>
+  </footer>
+
+  <script is:inline>
+    (function () {
+      const steps = [
+        {
+          title: "validateSign",
+          label: "Step 01 · Identity check",
+          body: "The handler reads the inbound Authorization header and the request body, asks the KeyManager for the sender's public key (looked up via the Registry plugin), and verifies the Ed25519 signature. If the signature is missing or invalid, the pipeline aborts immediately and the handler returns a signed NACK. On a bapTxnCaller the inbound caller is the buyer's own backend — the signature check confirms it has not been tampered with in flight.",
+          hint: "plugin: SignValidator · failure: 401 NACK signed by ackSigner"
+        },
+        {
+          title: "addRoute",
+          label: "Step 02 · Routing decision",
+          body: "The Router plugin walks the declared routing rules (by Beckn domain + version + endpoint) and chooses where this message goes next. For v1.x rules the match is keyed on domain; for v2.x rules routing is domain-agnostic. Targets can be a fixed URL, a dynamic bpp_uri pulled from the request context, the network gateway, or a message-queue topic for async dispatch.",
+          hint: "plugin: Router · output: stepCtx.Route ready for sign + publish"
+        },
+        {
+          title: "validateSchema",
+          label: "Step 03 · Protocol conformance",
+          body: "The SchemaValidator checks the message against the Beckn v2.0 OpenAPI spec — both the core protocol and, if extended validation is enabled, the domain-specific @context schema fetched from the URL embedded in the payload. The cached schema lifetime is configurable. A schema violation produces a 400 NACK with the failing path included in the error message.",
+          hint: "plugin: SchemaValidator · spec: beckn.org/protocol-specifications-v2"
+        },
+        {
+          title: "sign",
+          label: "Step 04 · Outbound signing",
+          body: "The Signer asks the KeyManager for this node's private key and produces an Ed25519 signature over the outbound body plus the standard Beckn signing string. The signature is attached as the Authorization header on the request that will leave the adapter. If a payloadStore is configured the raw header is also persisted for non-repudiation and countersignature validation later.",
+          hint: "plugin: Signer + KeyManager · stored optionally by PayloadStore"
+        },
+        {
+          title: "publish / forward",
+          label: "Step 05 · Send",
+          body: "Now the request actually leaves the adapter. If the route is a URL, the handler's wrapped http.Client posts the signed payload directly. If the route is a queue, the Publisher hands the message to RabbitMQ or Pub/Sub for asynchronous downstream processing. Either way the synchronous response — Beckn ACK or NACK — is itself signed before being returned to the caller, satisfying NFH-007 CON-004-02.",
+          hint: "plugin: Publisher OR http forward · response: signed ACK/NACK"
+        }
+      ];
+
+      const stepEls = document.querySelectorAll(".pipeline .step");
+      const detail = document.getElementById("stepDetail");
+
+      function setStep(i) {
+        stepEls.forEach((el, idx) => {
+          el.classList.toggle("active", idx === i);
+        });
+        const s = steps[i];
+        detail.innerHTML =
+          '<div class="lbl">' + s.label + '</div>' +
+          '<div class="title">' + s.title + '</div>' +
+          '<div>' + s.body + '</div>' +
+          '<div class="hint">' + s.hint + '</div>';
+      }
+      stepEls.forEach((el, idx) => {
+        el.addEventListener("click", function () { setStep(idx); });
+        el.addEventListener("mouseenter", function () { setStep(idx); });
+      });
+      setStep(0);
+
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+        });
+      }, { rootMargin: "0px 0px -60px 0px", threshold: 0.05 });
+
+      document.querySelectorAll("section, figure, header.hero .lede, header.hero .meta")
+        .forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
+    })();
+  </script>
+</BaseLayout>
