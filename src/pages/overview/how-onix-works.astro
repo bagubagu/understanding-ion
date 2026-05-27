@@ -1,18 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import '../../styles/how-onix-works.css';
 
 const title = "How ONIX Works — A Field Guide · ION Network";
 const description = "A working tour of beckn-ONIX, the Beckn protocol v2.0 adapter: what moves where, and why — across modules, pipeline, plugins, deployment, and observability.";
 ---
 
-<BaseLayout title={title} description={description} bodyClass={"onix"}>
-  <link
-    slot="head"
-    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  />
-
+<BaseLayout title={title} description={description}>
   <nav class="top">
     <div class="inner">
       <div class="brand">how <span class="dot">●</span> onix works</div>

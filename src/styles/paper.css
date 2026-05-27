@@ -13,12 +13,12 @@
   --max:          1180px;
   --col:          760px;
 }
-body.onix { box-sizing: border-box; }
-body.onix *,
-body.onix *::before,
-body.onix *::after { box-sizing: border-box; }
+body { box-sizing: border-box; }
+*,
+*::before,
+*::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-body.onix {
+body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
@@ -34,18 +34,18 @@ body.onix {
   background-position: 0 0, 1px 2px;
 }
 
-body.onix .display,
-body.onix h1,
-body.onix h2,
-body.onix h3 {
+body .display,
+body h1,
+body h2,
+body h3 {
   font-family: "Fraunces", "Times New Roman", serif;
   font-optical-sizing: auto;
   font-weight: 350;
   color: var(--ink);
   letter-spacing: -0.01em;
 }
-body.onix .mono { font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; }
-body.onix .smallcaps {
+body .mono { font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; }
+body .smallcaps {
   font-family: "JetBrains Mono", monospace;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -53,63 +53,63 @@ body.onix .smallcaps {
   font-weight: 500;
   color: var(--muted);
 }
-body.onix .ital { font-style: italic; }
-body.onix .rust { color: var(--rust); }
-body.onix .teal { color: var(--teal); }
-body.onix ::selection { background: var(--rust); color: var(--paper); }
+body .ital { font-style: italic; }
+body .rust { color: var(--rust); }
+body .teal { color: var(--teal); }
+body ::selection { background: var(--rust); color: var(--paper); }
 
-body.onix .page { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
-body.onix .col   { max-width: var(--col); margin: 0 auto; }
-body.onix .full  { max-width: 100%; }
+body .page { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
+body .col   { max-width: var(--col); margin: 0 auto; }
+body .full  { max-width: 100%; }
 
-body.onix nav.top {
+body nav.top {
   position: sticky; top: 0; z-index: 50;
   background: rgba(241, 234, 216, 0.92);
   backdrop-filter: saturate(140%) blur(6px);
   -webkit-backdrop-filter: saturate(140%) blur(6px);
   border-bottom: 1px solid var(--line);
 }
-body.onix nav.top .inner {
+body nav.top .inner {
   max-width: var(--max);
   margin: 0 auto;
   padding: 14px 32px;
   display: flex; align-items: baseline; justify-content: space-between;
   gap: 24px;
 }
-body.onix nav.top .brand {
+body nav.top .brand {
   font-family: "Fraunces", serif;
   font-weight: 400;
   font-style: italic;
   font-size: 17px;
   letter-spacing: -0.01em;
 }
-body.onix nav.top .brand .dot { color: var(--rust); }
-body.onix nav.top .links {
+body nav.top .brand .dot { color: var(--rust); }
+body nav.top .links {
   display: flex; gap: 22px; flex-wrap: wrap;
   font-family: "JetBrains Mono", monospace;
   font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--muted);
 }
-body.onix nav.top a { color: var(--muted); text-decoration: none; transition: color .15s; }
-body.onix nav.top a:hover { color: var(--rust); }
-body.onix nav.top a .n { color: var(--ink); margin-right: 6px; }
+body nav.top a { color: var(--muted); text-decoration: none; transition: color .15s; }
+body nav.top a:hover { color: var(--rust); }
+body nav.top a .n { color: var(--ink); margin-right: 6px; }
 
-body.onix header.hero { padding: 110px 0 80px; position: relative; overflow: hidden; }
-body.onix header.hero .kicker { margin-bottom: 28px; }
-body.onix header.hero h1 {
+body header.hero { padding: 110px 0 80px; position: relative; overflow: hidden; }
+body header.hero .kicker { margin-bottom: 28px; }
+body header.hero h1 {
   font-size: clamp(54px, 9vw, 132px);
   line-height: 0.92;
   font-weight: 300;
   margin: 0;
   font-variation-settings: "opsz" 144, "SOFT" 50;
 }
-body.onix header.hero h1 .ital { font-weight: 320; }
-body.onix header.hero h1 .acc {
+body header.hero h1 .ital { font-weight: 320; }
+body header.hero h1 .acc {
   color: var(--rust);
   font-style: italic;
   font-weight: 400;
 }
-body.onix header.hero .lede {
+body header.hero .lede {
   margin-top: 40px;
   max-width: 640px;
   font-size: 22px;
@@ -117,32 +117,32 @@ body.onix header.hero .lede {
   color: var(--ink-soft);
   font-weight: 350;
 }
-body.onix header.hero .lede em {
+body header.hero .lede em {
   font-family: "Fraunces", serif;
   font-style: italic;
   color: var(--rust);
 }
-body.onix header.hero .meta {
+body header.hero .meta {
   margin-top: 60px;
   display: flex; gap: 56px; flex-wrap: wrap;
   padding-top: 22px;
   border-top: 1px solid var(--line);
 }
-body.onix header.hero .meta .item .v { font-family: "Fraunces", serif; font-size: 22px; font-weight: 400; color: var(--ink); }
-body.onix header.hero .meta .item .l { display: block; margin-top: 2px; }
+body header.hero .meta .item .v { font-family: "Fraunces", serif; font-size: 22px; font-weight: 400; color: var(--ink); }
+body header.hero .meta .item .l { display: block; margin-top: 2px; }
 
-body.onix header.hero .deco {
+body header.hero .deco {
   position: absolute;
   top: 80px; right: -60px;
   width: 380px; height: 380px;
   opacity: 0.5;
   pointer-events: none;
 }
-@media (max-width: 900px) { body.onix header.hero .deco { display: none; } }
+@media (max-width: 900px) { body header.hero .deco { display: none; } }
 
-body.onix section { padding: 80px 0; border-top: 1px solid var(--line); position: relative; }
-body.onix section .head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 12px; }
-body.onix section .head .num {
+body section { padding: 80px 0; border-top: 1px solid var(--line); position: relative; }
+body section .head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 12px; }
+body section .head .num {
   font-family: "JetBrains Mono", monospace;
   font-size: 12px; letter-spacing: 0.18em;
   color: var(--rust);
@@ -151,20 +151,20 @@ body.onix section .head .num {
   padding: 3px 9px;
   border-radius: 999px;
 }
-body.onix section .head .tag {
+body section .head .tag {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--muted);
 }
-body.onix section h2 {
+body section h2 {
   font-size: clamp(36px, 5vw, 64px);
   line-height: 1.02;
   margin: 8px 0 22px;
   font-weight: 320;
   font-variation-settings: "opsz" 100;
 }
-body.onix section h2 .ital { font-style: italic; }
-body.onix section .standfirst {
+body section h2 .ital { font-style: italic; }
+body section .standfirst {
   font-size: 21px;
   line-height: 1.5;
   color: var(--ink-soft);
@@ -172,22 +172,22 @@ body.onix section .standfirst {
   font-weight: 350;
   margin-bottom: 40px;
 }
-body.onix section p { max-width: 680px; }
-body.onix section h3 {
+body section p { max-width: 680px; }
+body section h3 {
   font-size: 24px;
   font-weight: 400;
   margin-top: 36px; margin-bottom: 10px;
   font-variation-settings: "opsz" 60;
 }
 
-body.onix .with-marginalia {
+body .with-marginalia {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 240px;
   gap: 48px;
   align-items: start;
 }
-body.onix .with-marginalia > .body { min-width: 0; }
-body.onix .with-marginalia > aside {
+body .with-marginalia > .body { min-width: 0; }
+body .with-marginalia > aside {
   position: sticky; top: 80px;
   font-family: "JetBrains Mono", monospace;
   font-size: 11.5px;
@@ -196,50 +196,50 @@ body.onix .with-marginalia > aside {
   border-left: 1px solid var(--line);
   padding-left: 18px;
 }
-body.onix .with-marginalia > aside .label {
+body .with-marginalia > aside .label {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-size: 10px;
   color: var(--ink);
   margin-bottom: 10px;
 }
-body.onix .with-marginalia > aside .path { display: block; margin-bottom: 6px; color: var(--ink-soft); }
-body.onix .with-marginalia > aside .path:before { content: "▸ "; color: var(--rust); }
+body .with-marginalia > aside .path { display: block; margin-bottom: 6px; color: var(--ink-soft); }
+body .with-marginalia > aside .path:before { content: "▸ "; color: var(--rust); }
 @media (max-width: 900px) {
-  body.onix .with-marginalia { grid-template-columns: 1fr; }
-  body.onix .with-marginalia > aside { position: static; padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); margin-top: 24px; }
+  body .with-marginalia { grid-template-columns: 1fr; }
+  body .with-marginalia > aside { position: static; padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); margin-top: 24px; }
 }
 
-body.onix figure {
+body figure {
   margin: 36px 0;
   padding: 0;
 }
-body.onix figure .frame {
+body figure .frame {
   background: var(--paper-deep);
   border: 1px solid var(--line);
   padding: 32px;
   overflow: hidden;
   position: relative;
 }
-body.onix figure .frame svg { display: block; width: 100%; height: auto; }
-body.onix figure figcaption {
+body figure .frame svg { display: block; width: 100%; height: auto; }
+body figure figcaption {
   margin-top: 14px;
   display: flex; gap: 16px; align-items: baseline;
   font-family: "JetBrains Mono", monospace;
   font-size: 11px; color: var(--muted);
   letter-spacing: 0.06em;
 }
-body.onix figure figcaption .fig {
+body figure figcaption .fig {
   color: var(--rust); text-transform: uppercase; letter-spacing: 0.16em;
 }
-body.onix figure figcaption .cap {
+body figure figcaption .cap {
   font-family: "Newsreader", serif; font-style: italic;
   font-size: 14px; letter-spacing: 0; color: var(--ink-soft);
   line-height: 1.5;
 }
 
-body.onix .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 8px; }
-body.onix .chip {
+body .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 8px; }
+body .chip {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px; letter-spacing: 0.06em;
   padding: 4px 10px;
@@ -248,9 +248,9 @@ body.onix .chip {
   border-radius: 2px;
   color: var(--ink-soft);
 }
-body.onix .chip.rust { color: var(--rust); border-color: var(--rust); background: transparent; }
+body .chip.rust { color: var(--rust); border-color: var(--rust); background: transparent; }
 
-body.onix pre {
+body pre {
   background: var(--ink);
   color: #e8dec5;
   padding: 22px 24px;
@@ -261,10 +261,10 @@ body.onix pre {
   line-height: 1.6;
   margin: 22px 0;
 }
-body.onix pre .k { color: #e6b8a8; }
-body.onix pre .s { color: #c8b471; }
-body.onix pre .c { color: #7a6f5e; font-style: italic; }
-body.onix code:not(pre code) {
+body pre .k { color: #e6b8a8; }
+body pre .s { color: #c8b471; }
+body pre .c { color: #7a6f5e; font-style: italic; }
+body code:not(pre code) {
   font-family: "JetBrains Mono", monospace;
   font-size: 0.87em;
   background: var(--paper-deep);
@@ -274,15 +274,15 @@ body.onix code:not(pre code) {
   color: var(--ink);
 }
 
-body.onix .pipeline { margin: 36px 0; }
-body.onix .pipeline .track {
+body .pipeline { margin: 36px 0; }
+body .pipeline .track {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
   border: 1px solid var(--line);
   background: var(--paper-deep);
 }
-body.onix .pipeline .step {
+body .pipeline .step {
   padding: 22px 18px;
   border-right: 1px solid var(--line);
   cursor: pointer;
@@ -290,31 +290,31 @@ body.onix .pipeline .step {
   transition: background .18s, color .18s;
   position: relative;
 }
-body.onix .pipeline .step:last-child { border-right: 0; }
-body.onix .pipeline .step:hover { background: var(--paper); }
-body.onix .pipeline .step.active { background: var(--ink); color: var(--paper); }
-body.onix .pipeline .step.active .name { color: var(--paper); }
-body.onix .pipeline .step.active .num { color: var(--rust-soft); }
-body.onix .pipeline .step .num {
+body .pipeline .step:last-child { border-right: 0; }
+body .pipeline .step:hover { background: var(--paper); }
+body .pipeline .step.active { background: var(--ink); color: var(--paper); }
+body .pipeline .step.active .name { color: var(--paper); }
+body .pipeline .step.active .num { color: var(--rust-soft); }
+body .pipeline .step .num {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px; letter-spacing: 0.18em;
   color: var(--rust);
 }
-body.onix .pipeline .step .name {
+body .pipeline .step .name {
   font-family: "Fraunces", serif;
   font-size: 19px;
   font-style: italic;
   margin-top: 8px;
   font-variation-settings: "opsz" 36;
 }
-body.onix .pipeline .step .who {
+body .pipeline .step .who {
   font-family: "JetBrains Mono", monospace;
   font-size: 10.5px;
   margin-top: 12px;
   color: var(--muted);
 }
-body.onix .pipeline .step.active .who { color: var(--rust-soft); }
-body.onix .pipeline .detail {
+body .pipeline .step.active .who { color: var(--rust-soft); }
+body .pipeline .detail {
   margin-top: 0;
   padding: 24px 28px;
   background: var(--ink);
@@ -324,21 +324,21 @@ body.onix .pipeline .detail {
   line-height: 1.6;
   min-height: 120px;
 }
-body.onix .pipeline .detail .lbl {
+body .pipeline .detail .lbl {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px; letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--rust-soft);
   margin-bottom: 8px;
 }
-body.onix .pipeline .detail .title {
+body .pipeline .detail .title {
   font-family: "Fraunces", serif;
   font-size: 22px; font-style: italic;
   margin: 0 0 8px;
   color: var(--paper);
   font-weight: 350;
 }
-body.onix .pipeline .detail .hint {
+body .pipeline .detail .hint {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
   color: var(--rust-soft);
@@ -346,141 +346,141 @@ body.onix .pipeline .detail .hint {
   letter-spacing: 0.04em;
 }
 @media (max-width: 800px) {
-  body.onix .pipeline .track { grid-template-columns: 1fr 1fr; }
-  body.onix .pipeline .step { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  body .pipeline .track { grid-template-columns: 1fr 1fr; }
+  body .pipeline .step { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 }
 
-body.onix .matrix {
+body .matrix {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0;
   border: 1px solid var(--line);
   background: var(--paper-deep);
   margin: 30px 0;
 }
-body.onix .matrix .cell {
+body .matrix .cell {
   padding: 26px 26px 28px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   position: relative;
 }
-body.onix .matrix .cell:nth-child(2n) { border-right: 0; }
-body.onix .matrix .cell:nth-child(n+3) { border-bottom: 0; }
-body.onix .matrix .cell .role {
+body .matrix .cell:nth-child(2n) { border-right: 0; }
+body .matrix .cell:nth-child(n+3) { border-bottom: 0; }
+body .matrix .cell .role {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--rust);
 }
-body.onix .matrix .cell .id {
+body .matrix .cell .id {
   font-family: "JetBrains Mono", monospace;
   font-size: 14px;
   font-weight: 500;
   margin: 8px 0 10px;
   color: var(--ink);
 }
-body.onix .matrix .cell .desc {
+body .matrix .cell .desc {
   font-family: "Newsreader", serif;
   font-size: 15.5px; line-height: 1.55;
   color: var(--ink-soft);
   max-width: 320px;
 }
-body.onix .matrix .cell .ex {
+body .matrix .cell .ex {
   margin-top: 12px;
   font-family: "JetBrains Mono", monospace;
   font-size: 10.5px;
   color: var(--muted);
 }
-body.onix .matrix .cell .ex span { color: var(--rust); }
+body .matrix .cell .ex span { color: var(--rust); }
 @media (max-width: 700px) {
-  body.onix .matrix { grid-template-columns: 1fr; }
-  body.onix .matrix .cell { border-right: 0 !important; border-bottom: 1px solid var(--line) !important; }
-  body.onix .matrix .cell:last-child { border-bottom: 0 !important; }
+  body .matrix { grid-template-columns: 1fr; }
+  body .matrix .cell { border-right: 0 !important; border-bottom: 1px solid var(--line) !important; }
+  body .matrix .cell:last-child { border-bottom: 0 !important; }
 }
 
-body.onix .plug-cat { margin: 28px 0; }
-body.onix .plug-cat .cat-head {
+body .plug-cat { margin: 28px 0; }
+body .plug-cat .cat-head {
   display: flex; align-items: baseline; gap: 12px;
   border-bottom: 1px solid var(--line);
   padding-bottom: 8px; margin-bottom: 14px;
 }
-body.onix .plug-cat .cat-head .badge {
+body .plug-cat .cat-head .badge {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--paper);
   background: var(--ink);
   padding: 3px 8px;
 }
-body.onix .plug-cat .cat-head .name {
+body .plug-cat .cat-head .name {
   font-family: "Fraunces", serif;
   font-style: italic;
   font-size: 24px;
   font-weight: 350;
 }
-body.onix .plug-cat .cat-head .why {
+body .plug-cat .cat-head .why {
   margin-left: auto;
   font-family: "Newsreader", serif; font-style: italic;
   color: var(--muted); font-size: 14px;
 }
-body.onix .plug-grid {
+body .plug-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
 }
-body.onix .plug-grid .p {
+body .plug-grid .p {
   background: var(--paper-deep);
   padding: 16px 18px;
 }
-body.onix .plug-grid .p .nm {
+body .plug-grid .p .nm {
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
   font-weight: 500;
   color: var(--ink);
 }
-body.onix .plug-grid .p .dn {
+body .plug-grid .p .dn {
   font-family: "Newsreader", serif;
   font-size: 14.5px; line-height: 1.5;
   color: var(--ink-soft);
   margin-top: 6px;
 }
 
-body.onix .deploys {
+body .deploys {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
   margin: 30px 0;
   border: 1px solid var(--line);
 }
-body.onix .deploys .d {
+body .deploys .d {
   padding: 28px 24px;
   border-right: 1px solid var(--line);
   background: var(--paper-deep);
   position: relative;
 }
-body.onix .deploys .d:last-child { border-right: 0; }
-body.onix .deploys .d .head {
+body .deploys .d:last-child { border-right: 0; }
+body .deploys .d .head {
   display: flex; align-items: baseline; justify-content: space-between;
   margin-bottom: 8px;
 }
-body.onix .deploys .d .name {
+body .deploys .d .name {
   font-family: "Fraunces", serif;
   font-style: italic;
   font-size: 28px;
   font-weight: 350;
 }
-body.onix .deploys .d .tag {
+body .deploys .d .tag {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
   color: var(--rust);
   letter-spacing: 0.14em;
 }
-body.onix .deploys .d .sub {
+body .deploys .d .sub {
   font-family: "Newsreader", serif;
   color: var(--ink-soft);
   font-size: 15px;
   margin-bottom: 18px;
   min-height: 66px;
 }
-body.onix .deploys .d .mods {
+body .deploys .d .mods {
   display: flex; flex-wrap: wrap; gap: 6px;
 }
-body.onix .deploys .d .mods .m {
+body .deploys .d .mods .m {
   font-family: "JetBrains Mono", monospace;
   font-size: 10.5px;
   background: var(--paper);
@@ -488,25 +488,25 @@ body.onix .deploys .d .mods .m {
   padding: 4px 8px;
   color: var(--ink);
 }
-body.onix .deploys .d .mods .m.off { color: var(--line); text-decoration: line-through; }
+body .deploys .d .mods .m.off { color: var(--line); text-decoration: line-through; }
 @media (max-width: 800px) {
-  body.onix .deploys { grid-template-columns: 1fr; }
-  body.onix .deploys .d { border-right: 0; border-bottom: 1px solid var(--line); }
-  body.onix .deploys .d:last-child { border-bottom: 0; }
+  body .deploys { grid-template-columns: 1fr; }
+  body .deploys .d { border-right: 0; border-bottom: 1px solid var(--line); }
+  body .deploys .d:last-child { border-bottom: 0; }
 }
 
-body.onix footer.foot {
+body footer.foot {
   border-top: 1px solid var(--line);
   padding: 60px 0 80px;
   margin-top: 40px;
 }
-body.onix footer.foot .row {
+body footer.foot .row {
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: 24px;
   font-family: "JetBrains Mono", monospace;
   font-size: 11px; color: var(--muted);
   letter-spacing: 0.04em;
 }
-body.onix footer.foot .big {
+body footer.foot .big {
   font-family: "Fraunces", serif;
   font-style: italic;
   font-size: 42px;
@@ -516,7 +516,7 @@ body.onix footer.foot .big {
   max-width: 600px;
   line-height: 1.15;
 }
-body.onix footer.foot .big .rust { color: var(--rust); }
+body footer.foot .big .rust { color: var(--rust); }
 
-body.onix .reveal { opacity: 0; transform: translateY(8px); transition: opacity .7s, transform .7s; }
-body.onix .reveal.in { opacity: 1; transform: none; }
+body .reveal { opacity: 0; transform: translateY(8px); transition: opacity .7s, transform .7s; }
+body .reveal.in { opacity: 1; transform: none; }

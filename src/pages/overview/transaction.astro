@@ -1,534 +1,504 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import '../../styles/transaction.css';
 
 const title = "End-to-end transaction · ION Network";
 const description = "A worked example: a consumer buys a smartphone on Pasar Sapa from a Jakarta merchant, fulfilled by JNE — visualised across the Trade and Logistics sectors of the ION Network.";
 ---
 
-<BaseLayout title={title} description={description} bodyClass={"transaction"}>
-<header class="nav">
-    <div class="wrap nav-inner">
-      <a class="brand" href="/overview/">
-        <span class="brand-mark">I</span>
-        <span>ION Network</span>
-      </a>
-      <nav class="nav-links">
-        <a href="/overview/#diagram">Architecture</a>
-        <a href="/overview/#tiers">Layers</a>
-        <a href="/overview/transaction/" class="active">Transaction</a>
-        <a href="/overview/transaction-with-payment/">Transaction + Payment</a>
-      </nav>
+<BaseLayout title={title} description={description}>
+
+  <nav class="top">
+    <div class="inner">
+      <div class="brand">trade <span class="dot">●</span> logistics</div>
+      <div class="links">
+        <a href="/overview/"><span class="n">00</span>architecture</a>
+        <a href="#picture"><span class="n">01</span>picture</a>
+        <a href="#catalog"><span class="n">02</span>catalog</a>
+        <a href="#trade"><span class="n">03</span>trade</a>
+        <a href="#logistics"><span class="n">04</span>logistics</a>
+        <a href="#delivery"><span class="n">05</span>delivery</a>
+        <a href="#settle"><span class="n">06</span>settlement</a>
+        <a href="/overview/transaction-with-payment/">+ payment</a>
+        <a href="/overview/how-onix-works/">onix</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="page">
+      <div class="kicker smallcaps">End-to-end · Trade × Logistics</div>
+      <h1>
+        A <span class="acc ital">smartphone</span>,<br/>
+        ordered in <span class="ital">Surabaya.</span>
+      </h1>
+      <p class="lede">
+        One consumer purchase, two linked ION contracts — a Trade contract
+        between the buyer app and the merchant, and a Logistics contract
+        between the buyer app and the carrier. Joined by
+        <em>linkedContractId</em>, each runs its own Beckn message exchange
+        under the protocols ION ratifies.
+      </p>
+
+      <div class="meta">
+        <div class="item">
+          <div class="v">14</div>
+          <div class="l smallcaps">Phases</div>
+        </div>
+        <div class="item">
+          <div class="v">32</div>
+          <div class="l smallcaps">Messages</div>
+        </div>
+        <div class="item">
+          <div class="v">5</div>
+          <div class="l smallcaps">Actors</div>
+        </div>
+        <div class="item">
+          <div class="v">2</div>
+          <div class="l smallcaps">Linked contracts</div>
+        </div>
+      </div>
     </div>
   </header>
 
-  <main id="top" class="wrap">
 
-    <section class="hero">
-      <span class="eyebrow"><span class="dot"></span>End-to-end · Trade × Logistics</span>
-      <h1>A smartphone, ordered in Surabaya — across two ION sectors.</h1>
-      <p class="lede">
-        One consumer purchase, two linked ION contracts: a Trade contract between the buyer app and the merchant,
-        and a Logistics contract between the buyer app and the carrier. Joined by <code style="font-family:JetBrains Mono,monospace;font-size:13px;color:var(--accent);background:var(--accent-2);padding:1px 6px;border-radius:5px;">linkedContractId</code>,
-        each runs its own Beckn message exchange under the protocols ION ratifies.
+  <section id="actors">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">01</span>
+        <span class="tag">The actors</span>
+      </div>
+      <h2>One consumer, <span class="ital">five lanes.</span></h2>
+      <p class="standfirst">
+        Each actor shows up in exactly one lane in the sequence below.
+        Pasar Sapa wears both buyer-app hats — Trade and Logistics — and
+        the ION services stay quietly in the background, providing the
+        catalogue and policy registries everyone consults.
       </p>
 
-      <div class="scenario">
-        <div class="actor user">
-          <span class="role">Consumer</span>
-          <span class="name">Andi</span>
-          <span class="meta">Surabaya · 35-XXXX</span>
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">cast</span>
+          <span class="name">A single transaction</span>
+          <span class="why">surabaya → jakarta → surabaya</span>
         </div>
-        <div class="actor network">
-          <span class="role">BAP · both sectors</span>
-          <span class="name">Pasar Sapa</span>
-          <span class="meta">Buyer app</span>
-        </div>
-        <div class="actor trade">
-          <span class="role">BPP · Trade</span>
-          <span class="name">Toko Elektronik</span>
-          <span class="meta">Jakarta · electronics merchant</span>
-        </div>
-        <div class="actor logi">
-          <span class="role">BPP · Logistics</span>
-          <span class="name">JNE</span>
-          <span class="meta">LOG-PARCEL · NEXT_DAY</span>
-        </div>
-        <div class="actor network">
-          <span class="role">ION services</span>
-          <span class="name">Catalogue · Discover · Policy</span>
-          <span class="meta">Beckn Fabric · CDS</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="diagram">
-      <div class="diagram-card">
-        <!-- ===== Sequence diagram ===== -->
-        <svg viewBox="0 0 1180 2280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-title t-desc">
-          <title id="t-title">End-to-end ION transaction sequence</title>
-          <desc id="t-desc">Sequence diagram across five lanes — Consumer, BAP (Pasar Sapa), BPP-Trade (Toko Elektronik), BPP-Logistics (JNE), and ION Services — showing catalog discovery, Trade select-init-confirm, payment, Logistics select-init-confirm with linkedContractId, transit status events, delivery, and reconcile.</desc>
-
-          <defs>
-            <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
-            </marker>
-            <marker id="ahL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--logi)"/>
-            </marker>
-            <marker id="ahS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--status)"/>
-            </marker>
-            <marker id="ahO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--offnet)"/>
-            </marker>
-          </defs>
-
-          <!-- ====== Lane headers ====== -->
-          <!-- Lane x positions:
-               Consumer     :  100
-               BAP          :  340
-               BPP-Trade    :  580
-               BPP-Logistics:  820
-               ION Services : 1060
-          -->
-          <g>
-            <!-- Consumer -->
-            <rect x="35"  y="20" width="130" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--border)"/>
-            <text class="lane-label" x="100" y="44" text-anchor="middle">Consumer</text>
-            <text class="lane-sub"   x="100" y="62" text-anchor="middle">Andi · Surabaya</text>
-            <line class="lane-rail" x1="100" y1="80" x2="100" y2="2240"/>
-
-            <!-- BAP -->
-            <rect x="275" y="20" width="130" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--border)"/>
-            <text class="lane-label" x="340" y="40" text-anchor="middle">BAP</text>
-            <text class="lane-sub"   x="340" y="58" text-anchor="middle">Pasar Sapa</text>
-            <text class="lane-sub"   x="340" y="72" text-anchor="middle" font-style="italic">trade + logistics</text>
-            <line class="lane-rail" x1="340" y1="80" x2="340" y2="2240"/>
-
-            <!-- BPP-Trade -->
-            <rect x="515" y="20" width="130" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--accent)"/>
-            <text class="lane-label" x="580" y="40" text-anchor="middle">BPP · Trade</text>
-            <text class="lane-sub"   x="580" y="58" text-anchor="middle">Toko Elektronik</text>
-            <text class="lane-sub"   x="580" y="72" text-anchor="middle" font-style="italic">Jakarta merchant</text>
-            <line class="lane-rail" x1="580" y1="80" x2="580" y2="2240" stroke="var(--accent)" opacity="0.4"/>
-
-            <!-- BPP-Logistics -->
-            <rect x="755" y="20" width="130" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--logi)"/>
-            <text class="lane-label" x="820" y="40" text-anchor="middle">BPP · Logistics</text>
-            <text class="lane-sub"   x="820" y="58" text-anchor="middle">JNE</text>
-            <text class="lane-sub"   x="820" y="72" text-anchor="middle" font-style="italic">LOG-PARCEL</text>
-            <line class="lane-rail" x1="820" y1="80" x2="820" y2="2240" stroke="var(--logi)" opacity="0.4"/>
-
-            <!-- ION Services -->
-            <rect x="995" y="20" width="130" height="56" rx="10" fill="var(--bg-soft)" stroke="var(--border)"/>
-            <text class="lane-label" x="1060" y="40" text-anchor="middle">ION Services</text>
-            <text class="lane-sub"   x="1060" y="58" text-anchor="middle">Catalogue · CDS</text>
-            <text class="lane-sub"   x="1060" y="72" text-anchor="middle" font-style="italic">Policy registry</text>
-            <line class="lane-rail" x1="1060" y1="80" x2="1060" y2="2240"/>
-          </g>
-
-          <!-- ============================================================
-               PHASE 1 · CATALOG (background)
-               y: 100 → 220
-          ============================================================ -->
-          <rect x="20" y="100" width="1140" height="120" rx="8" fill="var(--bg-soft)" opacity="0.55"/>
-          <text class="phase-band-label" x="32" y="118">Phase 1 · Catalog (background)</text>
-
-          <!-- Trade catalog publish -->
-          <line class="msg-arrow trade" x1="580" y1="148" x2="1055" y2="148" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="780" y="142" text-anchor="middle">/catalog/publish</text>
-          <text class="msg-sub"   x="780" y="159" text-anchor="middle">Toko Elektronik publishes products + policy IRIs</text>
-
-          <!-- Logistics catalog publish -->
-          <line class="msg-arrow logi"  x1="820" y1="180" x2="1055" y2="180" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="938" y="174" text-anchor="middle">/catalog/publish</text>
-          <text class="msg-sub"   x="938" y="191" text-anchor="middle">JNE publishes rate logic + coverage</text>
-
-          <!-- Catalog subscription to BAP -->
-          <line class="msg-arrow trade" x1="1055" y1="208" x2="345" y2="208" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="700" y="202" text-anchor="middle">/on_subscribe → catalogs</text>
-          <text class="msg-sub"   x="700" y="219" text-anchor="middle">Pasar Sapa keeps a fresh local index</text>
-
-          <!-- ============================================================
-               PHASE 2 · BROWSE
-               y: 240 → 300
-          ============================================================ -->
-          <rect x="20" y="240" width="1140" height="60" rx="8" fill="none" stroke="none"/>
-          <text class="phase-band-label" x="32" y="258">Phase 2 · Browse</text>
-          <line class="msg-arrow trade" x1="100" y1="280" x2="335" y2="280" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="217" y="274" text-anchor="middle">search "smartphone"</text>
-          <text class="msg-sub"   x="217" y="292" text-anchor="middle">Andi opens Pasar Sapa, finds Toko Elektronik</text>
-
-          <!-- ============================================================
-               PHASE 3 · TRADE · /select
-               y: 320 → 420
-          ============================================================ -->
-          <rect x="20" y="320" width="1140" height="100" rx="8" fill="var(--accent-2)" opacity="0.35"/>
-          <text class="phase-band-label" x="32" y="338">Phase 3 · Trade · /select → /on_select</text>
-
-          <line class="msg-arrow trade" x1="340" y1="360" x2="575" y2="360" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="354" text-anchor="middle">/select</text>
-          <text class="msg-sub"   x="457" y="372" text-anchor="middle">item, qty=1, drop pincode 35-XXX</text>
-
-          <line class="msg-arrow trade" x1="575" y1="400" x2="345" y2="400" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="394" text-anchor="middle">/on_select</text>
-          <text class="msg-sub"   x="457" y="412" text-anchor="middle">quote.breakup: ITEM 5,000,000 · TAX (PPN 11%) 553,850</text>
-
-          <!-- ============================================================
-               PHASE 4 · TRADE · /init  + payment off-network
-               y: 440 → 620
-          ============================================================ -->
-          <rect x="20" y="440" width="1140" height="180" rx="8" fill="var(--accent-2)" opacity="0.35"/>
-          <text class="phase-band-label" x="32" y="458">Phase 4 · Trade · /init → /on_init  +  payment</text>
-
-          <line class="msg-arrow trade" x1="340" y1="482" x2="575" y2="482" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="476" text-anchor="middle">/init</text>
-          <text class="msg-sub"   x="457" y="494" text-anchor="middle">full address, payment intent QRIS, gift wrap</text>
-
-          <line class="msg-arrow trade" x1="575" y1="522" x2="345" y2="522" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="516" text-anchor="middle">/on_init</text>
-          <text class="msg-sub"   x="457" y="534" text-anchor="middle">payment.settlement_details = QRIS string</text>
-
-          <!-- consumer pays off-network -->
-          <line class="msg-arrow offnet" x1="100" y1="562" x2="335" y2="562" marker-end="url(#ahO)"/>
-          <text class="msg-label" x="217" y="556" text-anchor="middle">scan QRIS · pay via GoPay</text>
-          <text class="msg-sub"   x="217" y="574" text-anchor="middle">off-network settlement (BI-FAST rail)</text>
-
-          <line class="msg-arrow offnet" x1="345" y1="600" x2="575" y2="600" marker-end="url(#ahO)"/>
-          <text class="msg-label" x="457" y="594" text-anchor="middle">payment confirmed</text>
-          <text class="msg-sub"   x="457" y="612" text-anchor="middle">PSP webhook → BPP-Trade</text>
-
-          <!-- ============================================================
-               PHASE 5 · TRADE · /confirm
-               y: 640 → 740
-          ============================================================ -->
-          <rect x="20" y="640" width="1140" height="100" rx="8" fill="var(--accent-2)" opacity="0.35"/>
-          <text class="phase-band-label" x="32" y="658">Phase 5 · Trade · /confirm → /on_confirm</text>
-
-          <line class="msg-arrow trade" x1="340" y1="680" x2="575" y2="680" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="674" text-anchor="middle">/confirm</text>
-          <text class="msg-sub"   x="457" y="692" text-anchor="middle">consumer identity, paymentReference</text>
-
-          <line class="msg-arrow trade" x1="575" y1="720" x2="345" y2="720" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="714" text-anchor="middle">/on_confirm</text>
-          <text class="msg-sub"   x="457" y="732" text-anchor="middle">contract ACTIVE · fakturPajakReference · fulfillingLocationId</text>
-
-          <!-- ============================================================
-               PHASE 6 · LOGISTICS · /select → /on_select
-               y: 760 → 860
-          ============================================================ -->
-          <rect x="20" y="760" width="1140" height="100" rx="8" fill="var(--logi-2)" opacity="0.55"/>
-          <text class="phase-band-label" x="32" y="778">Phase 6 · Logistics · /select → /on_select</text>
-
-          <line class="msg-arrow logi" x1="340" y1="800" x2="815" y2="800" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="794" text-anchor="middle">/select</text>
-          <text class="msg-sub"   x="577" y="812" text-anchor="middle">pickup Jakarta · drop Surabaya · 1.2 kg · NEXT_DAY · declared 5,000,000</text>
-
-          <line class="msg-arrow logi" x1="815" y1="840" x2="345" y2="840" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="834" text-anchor="middle">/on_select</text>
-          <text class="msg-sub"   x="577" y="852" text-anchor="middle">binding rate 35,000 · quoteValidityWindow PT1H</text>
-
-          <!-- ============================================================
-               PHASE 7 · LOGISTICS · /init → /on_init
-               y: 880 → 980
-          ============================================================ -->
-          <rect x="20" y="880" width="1140" height="100" rx="8" fill="var(--logi-2)" opacity="0.55"/>
-          <text class="phase-band-label" x="32" y="898">Phase 7 · Logistics · /init → /on_init</text>
-
-          <line class="msg-arrow logi" x1="340" y1="920" x2="815" y2="920" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="914" text-anchor="middle">/init</text>
-          <text class="msg-sub"   x="577" y="932" text-anchor="middle">pickup + drop addresses · payment terms (FWA Pasar Sapa × JNE 2026Q2)</text>
-
-          <line class="msg-arrow logi" x1="815" y1="960" x2="345" y2="960" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="954" text-anchor="middle">/on_init</text>
-          <text class="msg-sub"   x="577" y="972" text-anchor="middle">FWA validated · settlement preview</text>
-
-          <!-- ============================================================
-               PHASE 8 · LOGISTICS · /confirm → /on_confirm  (LINKED!)
-               y: 1000 → 1110
-          ============================================================ -->
-          <rect x="20" y="1000" width="1140" height="110" rx="8" fill="var(--logi-2)" opacity="0.55"/>
-          <text class="phase-band-label" x="32" y="1018">Phase 8 · Logistics · /confirm → /on_confirm  ·  <tspan fill="var(--accent)">links to Trade contract</tspan></text>
-
-          <line class="msg-arrow logi" x1="340" y1="1042" x2="815" y2="1042" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="1036" text-anchor="middle">/confirm</text>
-          <text class="msg-sub"   x="577" y="1054" text-anchor="middle">contractAttributes.linkedContractId = TRADE/2026/0429/A1F2</text>
-
-          <line class="msg-arrow logi" x1="815" y1="1082" x2="345" y2="1082" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="1076" text-anchor="middle">/on_confirm</text>
-          <text class="msg-sub"   x="577" y="1094" text-anchor="middle">Logistics contract ACTIVE · awbNumber JNE-2026-7K3M9X</text>
-
-          <!-- ============================================================
-               PHASE 9 · STATUS — DISPATCHED + PICKED_UP
-               y: 1130 → 1240
-          ============================================================ -->
-          <rect x="20" y="1130" width="1140" height="110" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
-          <text class="phase-band-label" x="32" y="1148">Phase 9 · Pickup events</text>
-
-          <!-- Trade DISPATCHED to BAP -->
-          <line class="msg-arrow status" x1="575" y1="1172" x2="345" y2="1172" marker-end="url(#ahS)"/>
-          <text class="msg-label" x="457" y="1166" text-anchor="middle">/on_status [DISPATCHED]</text>
-          <text class="msg-sub"   x="457" y="1184" text-anchor="middle">awbNumber · trackingUrl · estimatedDeliveryTime</text>
-
-          <!-- Logistics PICKED_UP to BAP -->
-          <line class="msg-arrow status" x1="815" y1="1212" x2="345" y2="1212" marker-end="url(#ahS)"/>
-          <text class="msg-label" x="577" y="1206" text-anchor="middle">/on_status [PICKED_UP]</text>
-          <text class="msg-sub"   x="577" y="1224" text-anchor="middle">agentName · phoneProxy · vehiclePlate</text>
-
-          <!-- ============================================================
-               PHASE 10 · STATUS — IN_TRANSIT + OUT_FOR_DELIVERY  + /track
-               y: 1260 → 1410
-          ============================================================ -->
-          <rect x="20" y="1260" width="1140" height="150" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
-          <text class="phase-band-label" x="32" y="1278">Phase 10 · Transit · /track + on_status</text>
-
-          <line class="msg-arrow status" x1="815" y1="1302" x2="345" y2="1302" marker-end="url(#ahS)"/>
-          <text class="msg-label" x="577" y="1296" text-anchor="middle">/on_status [IN_TRANSIT]</text>
-          <text class="msg-sub"   x="577" y="1314" text-anchor="middle">at Jakarta hub · P2H2P routing</text>
-
-          <line class="msg-arrow logi" x1="340" y1="1338" x2="815" y2="1338" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="1332" text-anchor="middle">/track</text>
-          <text class="msg-sub"   x="577" y="1350" text-anchor="middle">request live GPS handle</text>
-
-          <line class="msg-arrow logi" x1="815" y1="1372" x2="345" y2="1372" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="1366" text-anchor="middle">/on_track</text>
-          <text class="msg-sub"   x="577" y="1384" text-anchor="middle">WebSocket URL streams live coordinates</text>
-
-          <line class="msg-arrow status" x1="815" y1="1402" x2="345" y2="1402" marker-end="url(#ahS)"/>
-          <text class="msg-label" x="577" y="1396" text-anchor="middle">/on_status [OUT_FOR_DELIVERY]</text>
-
-          <!-- ============================================================
-               PHASE 11 · DELIVERED  (consumer notified, both contracts)
-               y: 1430 → 1570
-          ============================================================ -->
-          <rect x="20" y="1430" width="1140" height="140" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
-          <text class="phase-band-label" x="32" y="1448">Phase 11 · Delivered</text>
-
-          <line class="msg-arrow status" x1="815" y1="1472" x2="345" y2="1472" marker-end="url(#ahS)"/>
-          <text class="msg-label" x="577" y="1466" text-anchor="middle">/on_status [DELIVERED]</text>
-          <text class="msg-sub"   x="577" y="1484" text-anchor="middle">deliveryProofUrl (photo) · ageVerification N/A</text>
-
-          <!-- BAP relays to BPP-Trade -->
-          <line class="msg-arrow trade" x1="340" y1="1510" x2="575" y2="1510" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="1504" text-anchor="middle">/update [DELIVERED]</text>
-          <text class="msg-sub"   x="457" y="1522" text-anchor="middle">Trade contract → COMPLETE</text>
-
-          <!-- BAP notifies consumer -->
-          <line class="msg-arrow status" x1="335" y1="1550" x2="105" y2="1550" marker-end="url(#ahS)"/>
-          <text class="msg-label" x="217" y="1544" text-anchor="middle">push: "delivered"</text>
-
-          <!-- ============================================================
-               PHASE 12 · /rate
-               y: 1590 → 1720
-          ============================================================ -->
-          <rect x="20" y="1590" width="1140" height="130" rx="8" fill="var(--bg-soft)" opacity="0.6"/>
-          <text class="phase-band-label" x="32" y="1608">Phase 12 · Rating</text>
-
-          <line class="msg-arrow trade" x1="100" y1="1632" x2="335" y2="1632" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="217" y="1626" text-anchor="middle">5★ + comment</text>
-
-          <line class="msg-arrow trade" x1="340" y1="1670" x2="575" y2="1670" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="1664" text-anchor="middle">/rate (PROVIDER, ITEM)</text>
-
-          <line class="msg-arrow logi" x1="340" y1="1706" x2="815" y2="1706" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="1700" text-anchor="middle">/rate (FULFILLMENT, AGENT)</text>
-
-          <!-- ============================================================
-               PHASE 13 · /reconcile (Trade)
-               y: 1740 → 1880
-          ============================================================ -->
-          <rect x="20" y="1740" width="1140" height="140" rx="8" fill="var(--accent-2)" opacity="0.35"/>
-          <text class="phase-band-label" x="32" y="1758">Phase 13 · Trade · /reconcile</text>
-
-          <line class="msg-arrow trade" x1="340" y1="1788" x2="575" y2="1788" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="1782" text-anchor="middle">/reconcile (try=true)</text>
-          <text class="msg-sub"   x="457" y="1800" text-anchor="middle">preview settlement statement</text>
-
-          <line class="msg-arrow trade" x1="575" y1="1828" x2="345" y2="1828" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="1822" text-anchor="middle">/on_reconcile</text>
-          <text class="msg-sub"   x="457" y="1840" text-anchor="middle">PPN remittance + PLATFORM_FEE + bukti potong</text>
-
-          <line class="msg-arrow trade" x1="345" y1="1866" x2="575" y2="1866" marker-end="url(#ahA)"/>
-          <text class="msg-label" x="457" y="1860" text-anchor="middle">/reconcile (commit)</text>
-
-          <!-- ============================================================
-               PHASE 14 · /reconcile (Logistics — batched)
-               y: 1900 → 2040
-          ============================================================ -->
-          <rect x="20" y="1900" width="1140" height="140" rx="8" fill="var(--logi-2)" opacity="0.55"/>
-          <text class="phase-band-label" x="32" y="1918">Phase 14 · Logistics · /reconcile (batched)</text>
-
-          <line class="msg-arrow logi" x1="340" y1="1948" x2="815" y2="1948" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="1942" text-anchor="middle">/reconcile (isBatch=true · period=2026-04)</text>
-
-          <line class="msg-arrow logi" x1="815" y1="1988" x2="345" y2="1988" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="1982" text-anchor="middle">/on_reconcile</text>
-          <text class="msg-sub"   x="577" y="2000" text-anchor="middle">FWA volume rebate · weight-dispute adjustments · NTPN refs</text>
-
-          <line class="msg-arrow logi" x1="345" y1="2026" x2="815" y2="2026" marker-end="url(#ahL)"/>
-          <text class="msg-label" x="577" y="2020" text-anchor="middle">/reconcile (commit)</text>
-
-          <!-- ============================================================
-               EPILOGUE — both contracts SETTLED
-               y: 2060 → 2240
-          ============================================================ -->
-          <g>
-            <rect x="20" y="2060" width="1140" height="170" rx="10" fill="var(--panel-alt)" opacity="0.65" stroke="var(--border)"/>
-            <text class="phase-band-label" x="32" y="2080">Epilogue</text>
-            <text x="590" y="2120" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="600" font-size="20" fill="var(--ink)">Both contracts SETTLED.</text>
-            <text x="590" y="2152" text-anchor="middle" font-family="Inter, system-ui" font-size="13" fill="var(--text-2)">Trade contract <tspan font-family="JetBrains Mono, monospace" font-size="12.5" fill="var(--accent)">TRADE/2026/0429/A1F2</tspan> · Logistics contract <tspan font-family="JetBrains Mono, monospace" font-size="12.5" fill="var(--logi)">LOG/2026/0429/J7K9</tspan></text>
-            <text x="590" y="2178" text-anchor="middle" font-family="Inter, system-ui" font-style="italic" font-size="13" fill="var(--muted)">Linked, settled, audit-ready — under terms ratified by the ION Council.</text>
-            <text x="590" y="2210" text-anchor="middle" font-family="Inter, system-ui" font-size="12" fill="var(--muted)">Total messages: 32 · Spans 2 sectors · 5 actors</text>
-          </g>
-        </svg>
-
-        <div class="legend">
-          <span class="item"><span class="swatch"></span> Trade message</span>
-          <span class="item"><span class="swatch logi"></span> Logistics message</span>
-          <span class="item"><span class="swatch status"></span> Unsolicited status push</span>
-          <span class="item"><span class="swatch offnet"></span> Off-network (payment rail)</span>
-          <span class="item" style="margin-left:auto;color:var(--muted);">Time flows top to bottom · Scroll horizontally on small screens</span>
+        <div class="plug-grid">
+          <div class="p">
+            <div class="nm">Andi</div>
+            <div class="dn">Consumer in Surabaya. Pincode 35-XXXX. Opens Pasar Sapa to buy a smartphone.</div>
+          </div>
+          <div class="p">
+            <div class="nm">Pasar Sapa</div>
+            <div class="dn">BAP for both Trade and Logistics. Wears two hats: aggregates listings, then dispatches shipments.</div>
+          </div>
+          <div class="p">
+            <div class="nm">Toko Elektronik</div>
+            <div class="dn">BPP · Trade. Jakarta electronics merchant. PKP-registered; issues Faktur Pajak.</div>
+          </div>
+          <div class="p">
+            <div class="nm">JNE</div>
+            <div class="dn">BPP · Logistics. LOG-PARCEL · NEXT_DAY. Operates under a Framework Agreement with Pasar Sapa.</div>
+          </div>
+          <div class="p">
+            <div class="nm">ION Services</div>
+            <div class="dn">Catalogue · CDS · Policy Registry. Quietly in the background — consulted, never blocked on.</div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="phases">
-      <div class="section-head">
-        <h2>Step by step</h2>
-        <span class="hint">14 phases · 32 messages · two contracts joined by <code style="font-family:JetBrains Mono,monospace;font-size:13px;color:var(--accent);background:var(--accent-2);padding:1px 6px;border-radius:5px;">linkedContractId</code></span>
+
+  <section id="picture">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">02</span>
+        <span class="tag">The picture</span>
+      </div>
+      <h2>Time flows <span class="ital">top to bottom.</span></h2>
+      <p class="standfirst">
+        Fourteen phases. Trade messages in rust. Logistics messages in
+        teal. Unsolicited status pushes in amber, dashed. The off-network
+        payment leg in muted grey, also dashed — ION never carries the
+        money itself.
+      </p>
+
+      <figure>
+        <div class="frame" style="overflow-x:auto;">
+          <svg viewBox="0 0 1180 2280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-title t-desc" style="min-width:900px;">
+            <title id="t-title">End-to-end ION transaction sequence</title>
+            <desc id="t-desc">Sequence diagram across five lanes — Consumer, BAP (Pasar Sapa), BPP-Trade (Toko Elektronik), BPP-Logistics (JNE), and ION Services — showing catalog discovery, Trade select-init-confirm, payment, Logistics select-init-confirm with linkedContractId, transit status events, delivery, and reconcile.</desc>
+
+            <defs>
+              <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#c63d1a"/>
+              </marker>
+              <marker id="ahL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#234951"/>
+              </marker>
+              <marker id="ahS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#b07c2e"/>
+              </marker>
+              <marker id="ahO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#7a6f5e"/>
+              </marker>
+            </defs>
+
+            <style>
+              .lane-head { fill: #e8dec5; stroke: #c6bba0; }
+              .lane-head.trade { stroke: #c63d1a; }
+              .lane-head.logi  { stroke: #234951; }
+              .lane-label { font: italic 350 17px "Fraunces", serif; fill: #161513; }
+              .lane-sub   { font: 400 10.5px "JetBrains Mono", monospace; fill: #7a6f5e; letter-spacing: 0.4px; }
+              .lane-rail  { stroke: #c6bba0; stroke-width: 0.8; stroke-dasharray: 3 5; fill: none; }
+              .phase-band-label { font: 500 11px "JetBrains Mono", monospace; fill: #c63d1a; letter-spacing: 2px; text-transform: uppercase; }
+              .msg-label  { font: italic 350 14px "Fraunces", serif; fill: #161513; }
+              .msg-sub    { font: italic 400 11.5px "Newsreader", serif; fill: #2a2622; }
+              .msg-arrow  { stroke-width: 1.6; fill: none; }
+              .msg-arrow.trade  { stroke: #c63d1a; }
+              .msg-arrow.logi   { stroke: #234951; }
+              .msg-arrow.status { stroke: #b07c2e; stroke-dasharray: 5 4; }
+              .msg-arrow.offnet { stroke: #7a6f5e; stroke-dasharray: 2 4; }
+            </style>
+
+            <g>
+              <rect class="lane-head" x="35"  y="20" width="130" height="56"/>
+              <text class="lane-label" x="100" y="46" text-anchor="middle">Consumer</text>
+              <text class="lane-sub"   x="100" y="64" text-anchor="middle">Andi · Surabaya</text>
+              <line class="lane-rail" x1="100" y1="80" x2="100" y2="2240"/>
+
+              <rect class="lane-head" x="275" y="20" width="130" height="56"/>
+              <text class="lane-label" x="340" y="42" text-anchor="middle">BAP</text>
+              <text class="lane-sub"   x="340" y="58" text-anchor="middle">Pasar Sapa</text>
+              <text class="lane-sub"   x="340" y="72" text-anchor="middle">trade + logistics</text>
+              <line class="lane-rail" x1="340" y1="80" x2="340" y2="2240"/>
+
+              <rect class="lane-head trade" x="515" y="20" width="130" height="56"/>
+              <text class="lane-label" x="580" y="42" text-anchor="middle">BPP · Trade</text>
+              <text class="lane-sub"   x="580" y="58" text-anchor="middle">Toko Elektronik</text>
+              <text class="lane-sub"   x="580" y="72" text-anchor="middle">Jakarta merchant</text>
+              <line class="lane-rail" x1="580" y1="80" x2="580" y2="2240" stroke="#c63d1a" opacity="0.45"/>
+
+              <rect class="lane-head logi" x="755" y="20" width="130" height="56"/>
+              <text class="lane-label" x="820" y="42" text-anchor="middle">BPP · Logistics</text>
+              <text class="lane-sub"   x="820" y="58" text-anchor="middle">JNE</text>
+              <text class="lane-sub"   x="820" y="72" text-anchor="middle">LOG-PARCEL</text>
+              <line class="lane-rail" x1="820" y1="80" x2="820" y2="2240" stroke="#234951" opacity="0.45"/>
+
+              <rect class="lane-head" x="995" y="20" width="130" height="56"/>
+              <text class="lane-label" x="1060" y="42" text-anchor="middle">ION Services</text>
+              <text class="lane-sub"   x="1060" y="58" text-anchor="middle">Catalogue · CDS</text>
+              <text class="lane-sub"   x="1060" y="72" text-anchor="middle">Policy registry</text>
+              <line class="lane-rail" x1="1060" y1="80" x2="1060" y2="2240"/>
+            </g>
+
+            <rect x="20" y="100" width="1140" height="120" fill="#e8dec5" opacity="0.6"/>
+            <text class="phase-band-label" x="32" y="118">Phase 01 · Catalog (background)</text>
+            <line class="msg-arrow trade" x1="580" y1="148" x2="1055" y2="148" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="780" y="142" text-anchor="middle">/catalog/publish</text>
+            <text class="msg-sub"   x="780" y="159" text-anchor="middle">Toko Elektronik publishes products + policy IRIs</text>
+            <line class="msg-arrow logi"  x1="820" y1="180" x2="1055" y2="180" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="938" y="174" text-anchor="middle">/catalog/publish</text>
+            <text class="msg-sub"   x="938" y="191" text-anchor="middle">JNE publishes rate logic + coverage</text>
+            <line class="msg-arrow trade" x1="1055" y1="208" x2="345" y2="208" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="700" y="202" text-anchor="middle">/on_subscribe → catalogs</text>
+            <text class="msg-sub"   x="700" y="219" text-anchor="middle">Pasar Sapa keeps a fresh local index</text>
+
+            <text class="phase-band-label" x="32" y="258">Phase 02 · Browse</text>
+            <line class="msg-arrow trade" x1="100" y1="280" x2="335" y2="280" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="217" y="274" text-anchor="middle">search "smartphone"</text>
+            <text class="msg-sub"   x="217" y="292" text-anchor="middle">Andi opens Pasar Sapa, finds Toko Elektronik</text>
+
+            <rect x="20" y="320" width="1140" height="100" fill="#e6b8a8" opacity="0.22"/>
+            <text class="phase-band-label" x="32" y="338">Phase 03 · Trade · /select → /on_select</text>
+            <line class="msg-arrow trade" x1="340" y1="360" x2="575" y2="360" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="354" text-anchor="middle">/select</text>
+            <text class="msg-sub"   x="457" y="372" text-anchor="middle">item, qty=1, drop pincode 35-XXX</text>
+            <line class="msg-arrow trade" x1="575" y1="400" x2="345" y2="400" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="394" text-anchor="middle">/on_select</text>
+            <text class="msg-sub"   x="457" y="412" text-anchor="middle">quote.breakup: ITEM 5,000,000 · TAX (PPN 11%) 553,850</text>
+
+            <rect x="20" y="440" width="1140" height="180" fill="#e6b8a8" opacity="0.22"/>
+            <text class="phase-band-label" x="32" y="458">Phase 04 · Trade · /init → /on_init  +  payment</text>
+            <line class="msg-arrow trade" x1="340" y1="482" x2="575" y2="482" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="476" text-anchor="middle">/init</text>
+            <text class="msg-sub"   x="457" y="494" text-anchor="middle">full address, payment intent QRIS, gift wrap</text>
+            <line class="msg-arrow trade" x1="575" y1="522" x2="345" y2="522" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="516" text-anchor="middle">/on_init</text>
+            <text class="msg-sub"   x="457" y="534" text-anchor="middle">payment.settlement_details = QRIS string</text>
+            <line class="msg-arrow offnet" x1="100" y1="562" x2="335" y2="562" marker-end="url(#ahO)"/>
+            <text class="msg-label" x="217" y="556" text-anchor="middle">scan QRIS · pay via GoPay</text>
+            <text class="msg-sub"   x="217" y="574" text-anchor="middle">off-network settlement (BI-FAST rail)</text>
+            <line class="msg-arrow offnet" x1="345" y1="600" x2="575" y2="600" marker-end="url(#ahO)"/>
+            <text class="msg-label" x="457" y="594" text-anchor="middle">payment confirmed</text>
+            <text class="msg-sub"   x="457" y="612" text-anchor="middle">PSP webhook → BPP-Trade</text>
+
+            <rect x="20" y="640" width="1140" height="100" fill="#e6b8a8" opacity="0.22"/>
+            <text class="phase-band-label" x="32" y="658">Phase 05 · Trade · /confirm → /on_confirm</text>
+            <line class="msg-arrow trade" x1="340" y1="680" x2="575" y2="680" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="674" text-anchor="middle">/confirm</text>
+            <text class="msg-sub"   x="457" y="692" text-anchor="middle">consumer identity, paymentReference</text>
+            <line class="msg-arrow trade" x1="575" y1="720" x2="345" y2="720" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="714" text-anchor="middle">/on_confirm</text>
+            <text class="msg-sub"   x="457" y="732" text-anchor="middle">contract ACTIVE · fakturPajakReference · fulfillingLocationId</text>
+
+            <rect x="20" y="760" width="1140" height="100" fill="#234951" opacity="0.12"/>
+            <text class="phase-band-label" x="32" y="778" style="fill:#234951;">Phase 06 · Logistics · /select → /on_select</text>
+            <line class="msg-arrow logi" x1="340" y1="800" x2="815" y2="800" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="794" text-anchor="middle">/select</text>
+            <text class="msg-sub"   x="577" y="812" text-anchor="middle">pickup Jakarta · drop Surabaya · 1.2 kg · NEXT_DAY · declared 5,000,000</text>
+            <line class="msg-arrow logi" x1="815" y1="840" x2="345" y2="840" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="834" text-anchor="middle">/on_select</text>
+            <text class="msg-sub"   x="577" y="852" text-anchor="middle">binding rate 35,000 · quoteValidityWindow PT1H</text>
+
+            <rect x="20" y="880" width="1140" height="100" fill="#234951" opacity="0.12"/>
+            <text class="phase-band-label" x="32" y="898" style="fill:#234951;">Phase 07 · Logistics · /init → /on_init</text>
+            <line class="msg-arrow logi" x1="340" y1="920" x2="815" y2="920" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="914" text-anchor="middle">/init</text>
+            <text class="msg-sub"   x="577" y="932" text-anchor="middle">pickup + drop addresses · payment terms (FWA Pasar Sapa × JNE 2026Q2)</text>
+            <line class="msg-arrow logi" x1="815" y1="960" x2="345" y2="960" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="954" text-anchor="middle">/on_init</text>
+            <text class="msg-sub"   x="577" y="972" text-anchor="middle">FWA validated · settlement preview</text>
+
+            <rect x="20" y="1000" width="1140" height="110" fill="#234951" opacity="0.12"/>
+            <text class="phase-band-label" x="32" y="1018" style="fill:#234951;">Phase 08 · Logistics · /confirm → /on_confirm  ·  <tspan fill="#c63d1a">links to Trade contract</tspan></text>
+            <line class="msg-arrow logi" x1="340" y1="1042" x2="815" y2="1042" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="1036" text-anchor="middle">/confirm</text>
+            <text class="msg-sub"   x="577" y="1054" text-anchor="middle">contractAttributes.linkedContractId = TRADE/2026/0429/A1F2</text>
+            <line class="msg-arrow logi" x1="815" y1="1082" x2="345" y2="1082" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="1076" text-anchor="middle">/on_confirm</text>
+            <text class="msg-sub"   x="577" y="1094" text-anchor="middle">Logistics contract ACTIVE · awbNumber JNE-2026-7K3M9X</text>
+
+            <rect x="20" y="1130" width="1140" height="110" fill="#e8dec5" opacity="0.7"/>
+            <text class="phase-band-label" x="32" y="1148">Phase 09 · Pickup events</text>
+            <line class="msg-arrow status" x1="575" y1="1172" x2="345" y2="1172" marker-end="url(#ahS)"/>
+            <text class="msg-label" x="457" y="1166" text-anchor="middle">/on_status [DISPATCHED]</text>
+            <text class="msg-sub"   x="457" y="1184" text-anchor="middle">awbNumber · trackingUrl · estimatedDeliveryTime</text>
+            <line class="msg-arrow status" x1="815" y1="1212" x2="345" y2="1212" marker-end="url(#ahS)"/>
+            <text class="msg-label" x="577" y="1206" text-anchor="middle">/on_status [PICKED_UP]</text>
+            <text class="msg-sub"   x="577" y="1224" text-anchor="middle">agentName · phoneProxy · vehiclePlate</text>
+
+            <rect x="20" y="1260" width="1140" height="150" fill="#e8dec5" opacity="0.7"/>
+            <text class="phase-band-label" x="32" y="1278">Phase 10 · Transit · /track + on_status</text>
+            <line class="msg-arrow status" x1="815" y1="1302" x2="345" y2="1302" marker-end="url(#ahS)"/>
+            <text class="msg-label" x="577" y="1296" text-anchor="middle">/on_status [IN_TRANSIT]</text>
+            <text class="msg-sub"   x="577" y="1314" text-anchor="middle">at Jakarta hub · P2H2P routing</text>
+            <line class="msg-arrow logi" x1="340" y1="1338" x2="815" y2="1338" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="1332" text-anchor="middle">/track</text>
+            <text class="msg-sub"   x="577" y="1350" text-anchor="middle">request live GPS handle</text>
+            <line class="msg-arrow logi" x1="815" y1="1372" x2="345" y2="1372" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="1366" text-anchor="middle">/on_track</text>
+            <text class="msg-sub"   x="577" y="1384" text-anchor="middle">WebSocket URL streams live coordinates</text>
+            <line class="msg-arrow status" x1="815" y1="1402" x2="345" y2="1402" marker-end="url(#ahS)"/>
+            <text class="msg-label" x="577" y="1396" text-anchor="middle">/on_status [OUT_FOR_DELIVERY]</text>
+
+            <rect x="20" y="1430" width="1140" height="140" fill="#e8dec5" opacity="0.7"/>
+            <text class="phase-band-label" x="32" y="1448">Phase 11 · Delivered</text>
+            <line class="msg-arrow status" x1="815" y1="1472" x2="345" y2="1472" marker-end="url(#ahS)"/>
+            <text class="msg-label" x="577" y="1466" text-anchor="middle">/on_status [DELIVERED]</text>
+            <text class="msg-sub"   x="577" y="1484" text-anchor="middle">deliveryProofUrl (photo) · ageVerification N/A</text>
+            <line class="msg-arrow trade" x1="340" y1="1510" x2="575" y2="1510" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="1504" text-anchor="middle">/update [DELIVERED]</text>
+            <text class="msg-sub"   x="457" y="1522" text-anchor="middle">Trade contract → COMPLETE</text>
+            <line class="msg-arrow status" x1="335" y1="1550" x2="105" y2="1550" marker-end="url(#ahS)"/>
+            <text class="msg-label" x="217" y="1544" text-anchor="middle">push: "delivered"</text>
+
+            <rect x="20" y="1590" width="1140" height="130" fill="#e8dec5" opacity="0.7"/>
+            <text class="phase-band-label" x="32" y="1608">Phase 12 · Rating</text>
+            <line class="msg-arrow trade" x1="100" y1="1632" x2="335" y2="1632" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="217" y="1626" text-anchor="middle">5★ + comment</text>
+            <line class="msg-arrow trade" x1="340" y1="1670" x2="575" y2="1670" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="1664" text-anchor="middle">/rate (PROVIDER, ITEM)</text>
+            <line class="msg-arrow logi" x1="340" y1="1706" x2="815" y2="1706" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="1700" text-anchor="middle">/rate (FULFILLMENT, AGENT)</text>
+
+            <rect x="20" y="1740" width="1140" height="140" fill="#e6b8a8" opacity="0.22"/>
+            <text class="phase-band-label" x="32" y="1758">Phase 13 · Trade · /reconcile</text>
+            <line class="msg-arrow trade" x1="340" y1="1788" x2="575" y2="1788" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="1782" text-anchor="middle">/reconcile (try=true)</text>
+            <text class="msg-sub"   x="457" y="1800" text-anchor="middle">preview settlement statement</text>
+            <line class="msg-arrow trade" x1="575" y1="1828" x2="345" y2="1828" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="1822" text-anchor="middle">/on_reconcile</text>
+            <text class="msg-sub"   x="457" y="1840" text-anchor="middle">PPN remittance + PLATFORM_FEE + bukti potong</text>
+            <line class="msg-arrow trade" x1="345" y1="1866" x2="575" y2="1866" marker-end="url(#ahA)"/>
+            <text class="msg-label" x="457" y="1860" text-anchor="middle">/reconcile (commit)</text>
+
+            <rect x="20" y="1900" width="1140" height="140" fill="#234951" opacity="0.12"/>
+            <text class="phase-band-label" x="32" y="1918" style="fill:#234951;">Phase 14 · Logistics · /reconcile (batched)</text>
+            <line class="msg-arrow logi" x1="340" y1="1948" x2="815" y2="1948" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="1942" text-anchor="middle">/reconcile (isBatch=true · period=2026-04)</text>
+            <line class="msg-arrow logi" x1="815" y1="1988" x2="345" y2="1988" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="1982" text-anchor="middle">/on_reconcile</text>
+            <text class="msg-sub"   x="577" y="2000" text-anchor="middle">FWA volume rebate · weight-dispute adjustments · NTPN refs</text>
+            <line class="msg-arrow logi" x1="345" y1="2026" x2="815" y2="2026" marker-end="url(#ahL)"/>
+            <text class="msg-label" x="577" y="2020" text-anchor="middle">/reconcile (commit)</text>
+
+            <g>
+              <rect x="20" y="2060" width="1140" height="170" fill="#e8dec5" stroke="#c6bba0"/>
+              <text class="phase-band-label" x="32" y="2080">Epilogue</text>
+              <text x="590" y="2122" text-anchor="middle" font-family="Fraunces" font-style="italic" font-size="24" font-weight="350" fill="#161513">Both contracts SETTLED.</text>
+              <text x="590" y="2154" text-anchor="middle" font-family="Newsreader" font-size="13" fill="#2a2622">Trade contract <tspan font-family="JetBrains Mono" font-size="12" fill="#c63d1a">TRADE/2026/0429/A1F2</tspan> · Logistics contract <tspan font-family="JetBrains Mono" font-size="12" fill="#234951">LOG/2026/0429/J7K9</tspan></text>
+              <text x="590" y="2180" text-anchor="middle" font-family="Newsreader" font-style="italic" font-size="13" fill="#7a6f5e">Linked, settled, audit-ready — under terms ratified by the ION Council.</text>
+              <text x="590" y="2210" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e" letter-spacing="0.4px">32 messages · 2 sectors · 5 actors</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>
+          <span class="fig">fig. 01</span>
+          <span class="cap">Each phase is a banded block on the rail. Scroll horizontally on small screens.</span>
+        </figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+
+  <section id="catalog">
+    <div class="page">
+      <div class="head">
+        <span class="num">03</span>
+        <span class="tag">Catalog & browse</span>
+      </div>
+      <h2>The background, <span class="ital">already done.</span></h2>
+      <p class="standfirst">
+        By the time Andi opens Pasar Sapa, the heavy lifting has already
+        happened. BPPs publish to the network and BAPs keep a fresh local
+        index — search runs against the index, not against the live
+        network.
+      </p>
+
+      <div class="plug-grid">
+        <div class="p"><div class="nm">01 · Catalog</div><div class="dn">Toko Elektronik publishes products with halal status, BPOM refs, and return-policy IRIs. JNE publishes rate logic and provincial coverage. Pasar Sapa subscribes once.</div></div>
+        <div class="p"><div class="nm">02 · Browse</div><div class="dn">Andi opens the app. Search runs against the local index — no live network call. The listing appears with its declared <code>availability.status</code>.</div></div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="trade">
+    <div class="page">
+      <div class="head">
+        <span class="num">04</span>
+        <span class="tag">Trade contract</span>
+      </div>
+      <h2>Quote, <span class="ital">bind, settle the intent.</span></h2>
+      <p class="standfirst">
+        Three phases turn a search hit into a Trade contract. The price
+        carries PPN at the rate sourced from current PMK; the address
+        carries the consumer's full Surabaya postal; the QRIS string
+        rides over BI-FAST. ION never touches the money.
+      </p>
+
+      <div class="plug-grid">
+        <div class="p"><div class="nm">03 · /select</div><div class="dn">BAP submits item, qty, and drop pincode. BPP returns a quote with structured breakup including PPN.</div></div>
+        <div class="p"><div class="nm">04 · /init + payment</div><div class="dn">Full address + payment intent. BPP returns a QRIS string. Settlement flows over BI-FAST off-network.</div></div>
+        <div class="p"><div class="nm">05 · /confirm</div><div class="dn">Payment lands at PSP, BAP confirms. Toko Elektronik returns Faktur Pajak ref + warehouse. <strong>Trade contract ACTIVE.</strong></div></div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="logistics">
+    <div class="page">
+      <div class="head">
+        <span class="num">05</span>
+        <span class="tag">Logistics contract</span>
+      </div>
+      <h2>The <span class="ital">second</span> contract, linked to the first.</h2>
+
+      <div class="with-marginalia">
+        <div class="body">
+          <p class="standfirst">
+            Pasar Sapa now wears its Logistics-BAP hat and calls JNE. Three
+            more phases — the same shape as Trade — but the
+            <code>/confirm</code> here carries
+            <code>contractAttributes.linkedContractId</code>, pointing back
+            at the Trade contract. That single field stitches the two halves
+            of the transaction together.
+          </p>
+          <div class="plug-grid">
+            <div class="p"><div class="nm">06 · /select</div><div class="dn">Actual shipment profile — pickup, drop, weight, declared value. JNE returns a binding rate with a quote validity window.</div></div>
+            <div class="p"><div class="nm">07 · /init + FWA</div><div class="dn">BAP attaches the active <code>logistics-fwa</code> reference (Pasar Sapa × JNE 2026 Q2). The FWA's commercial envelope supersedes per-offer policies.</div></div>
+            <div class="p"><div class="nm">08 · /confirm + link</div><div class="dn">Carries <code>linkedContractId = TRADE/2026/0429/A1F2</code>. JNE returns an AWB; <strong>Logistics contract ACTIVE.</strong></div></div>
+          </div>
+        </div>
+        <aside>
+          <div class="label">contract ids</div>
+          <span class="path">TRADE/2026/0429/A1F2</span>
+          <span class="path">LOG/2026/0429/J7K9</span>
+          <div class="label" style="margin-top:18px;">link field</div>
+          <span class="path">contractAttributes.linkedContractId</span>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="delivery">
+    <div class="page">
+      <div class="head">
+        <span class="num">06</span>
+        <span class="tag">Transit & delivery</span>
+      </div>
+      <h2>Status pushes, <span class="ital">live tracking, the door.</span></h2>
+      <p class="standfirst">
+        Three phases of status events stitched between two contracts.
+        Phone numbers are proxied — direct numbers never on the wire. The
+        delivered photo closes both contracts; Andi gets a push.
+      </p>
+
+      <div class="plug-grid">
+        <div class="p"><div class="nm">09 · Pickup events</div><div class="dn">BPP-Trade pushes <code>DISPATCHED</code> with the AWB. JNE collects from the warehouse and pushes <code>PICKED_UP</code> with proxy phone numbers.</div></div>
+        <div class="p"><div class="nm">10 · Transit</div><div class="dn">JNE routes through Jakarta hub (P2H2P). Pasar Sapa opens a <code>/track</code> session for live GPS in addition to coarse status pushes.</div></div>
+        <div class="p"><div class="nm">11 · Delivered</div><div class="dn">JNE pushes <code>DELIVERED</code> with a delivery-proof photo. BAP relays via <code>/update</code>; Trade contract → COMPLETE.</div></div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="settle">
+    <div class="page">
+      <div class="head">
+        <span class="num">07</span>
+        <span class="tag">Settlement</span>
+      </div>
+      <h2>Money, with <span class="ital">proof.</span></h2>
+      <p class="standfirst">
+        Rating, then reconcile. Trade reconciles per-contract with PPN
+        remittance and bukti potong refs. Logistics doesn't scale at
+        per-shipment granularity, so it reconciles monthly batches with
+        FWA rebates applied.
+      </p>
+
+      <div class="plug-grid">
+        <div class="p"><div class="nm">12 · Rating</div><div class="dn">Andi rates once. Pasar Sapa splits into Trade ratings (PROVIDER, ITEM) and Logistics ratings (FULFILLMENT, PACKAGE_CONDITION, AGENT_BEHAVIOUR).</div></div>
+        <div class="p"><div class="nm">13 · Trade reconcile</div><div class="dn">BAP previews, then commits. <code>/on_reconcile</code> carries PPN remittance, platform fee, and bukti potong references — everything an auditor needs.</div></div>
+        <div class="p"><div class="nm">14 · Logistics reconcile</div><div class="dn">Per-shipment reconcile doesn't scale at marketplace volume — Logistics settles monthly with <code>isBatch=true</code>, applying FWA volume rebates and weight-dispute adjustments.</div></div>
       </div>
 
-      <div class="phase-grid">
+      <p>
+        <em>The link is the whole point.</em> Every Logistics contract
+        carries <code>contractAttributes.linkedContractId</code> — so when
+        the BAP queries either side, the network can stitch the full story
+        together: who bought what, who shipped it, what was charged, and
+        what was settled.
+      </p>
+    </div>
+  </section>
 
-        <article class="phase">
-          <span class="num">1</span>
-          <span class="tag">Catalog</span>
-          <h3>Background discovery</h3>
-          <p>Toko Elektronik publishes its product catalog (with halal status, BPOM refs, return-policy IRIs). JNE publishes rate logic and provincial coverage. Pasar Sapa subscribes once and keeps the index fresh.</p>
-          <ul><li>/catalog/publish</li><li>/on_subscribe</li><li>policy IRIs</li></ul>
-        </article>
 
-        <article class="phase user">
-          <span class="num">2</span>
-          <span class="tag">Browse</span>
-          <h3>Andi opens the app</h3>
-          <p>Search runs against Pasar Sapa's local index — no live network call. Toko Elektronik's listing appears with its declared <code style="font-family:JetBrains Mono,monospace;font-size:12px;">availability.status</code>.</p>
-        </article>
-
-        <article class="phase">
-          <span class="num">3</span>
-          <span class="tag">Trade · select</span>
-          <h3>Quote the order</h3>
-          <p>BAP submits the desired item, qty, and drop pincode. BPP returns a quote with a structured breakup including PPN at the rate sourced from current PMK.</p>
-          <ul><li>/select</li><li>/on_select</li><li>quote.breakup</li><li>ppnRate</li></ul>
-        </article>
-
-        <article class="phase">
-          <span class="num">4</span>
-          <span class="tag">Trade · init</span>
-          <h3>Address + payment intent</h3>
-          <p>BAP commits the consumer's full Surabaya address and chosen payment method. BPP returns a QRIS string for the consumer to scan. Settlement flows over BI-FAST off-network — ION never carries the money itself.</p>
-          <ul><li>/init</li><li>/on_init</li><li>QRIS settlement_details</li></ul>
-        </article>
-
-        <article class="phase">
-          <span class="num">5</span>
-          <span class="tag">Trade · confirm</span>
-          <h3>Bind the Trade contract</h3>
-          <p>Once payment lands at the merchant's PSP, BAP confirms. Toko Elektronik (PKP-registered) returns a Faktur Pajak reference and the warehouse it will fulfil from. <b>Trade contract is now ACTIVE</b>.</p>
-          <ul><li>/confirm</li><li>/on_confirm</li><li>fakturPajakReference</li><li>fulfillingLocationId</li></ul>
-        </article>
-
-        <article class="phase logi">
-          <span class="num">6</span>
-          <span class="tag">Logistics · select</span>
-          <h3>Bind a binding rate</h3>
-          <p>Pasar Sapa (now wearing its Logistics-BAP hat) calls JNE with the actual shipment profile — pickup address, drop pincode, weight, declared value. JNE returns a binding rate with a quote validity window.</p>
-          <ul><li>/select</li><li>/on_select</li><li>quoteValidityWindow</li></ul>
-        </article>
-
-        <article class="phase logi">
-          <span class="num">7</span>
-          <span class="tag">Logistics · init</span>
-          <h3>Apply Framework Agreement</h3>
-          <p>BAP attaches the active <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">logistics-fwa</code> reference (Pasar Sapa × JNE 2026 Q2). The FWA's commercial envelope — SLA, rebates, dispute terms — supersedes per-offer policies.</p>
-          <ul><li>/init</li><li>/on_init</li><li>fwaReference</li></ul>
-        </article>
-
-        <article class="phase logi">
-          <span class="num">8</span>
-          <span class="tag">Logistics · confirm</span>
-          <h3>Two contracts, one transaction</h3>
-          <p>The Logistics confirm carries <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--accent);">contractAttributes.linkedContractId</code> pointing at the Trade contract id. JNE returns an AWB and the Logistics contract goes ACTIVE.</p>
-          <ul><li>/confirm</li><li>/on_confirm</li><li>linkedContractId</li><li>awbNumber</li></ul>
-        </article>
-
-        <article class="phase">
-          <span class="num">9</span>
-          <span class="tag">Status</span>
-          <h3>DISPATCHED + PICKED_UP</h3>
-          <p>BPP-Trade pushes <code style="font-family:JetBrains Mono,monospace;font-size:12px;">DISPATCHED</code> with the AWB. Once JNE collects the parcel from the merchant warehouse, it pushes <code style="font-family:JetBrains Mono,monospace;font-size:12px;">PICKED_UP</code> with proxy phone numbers — direct numbers are never on the wire.</p>
-          <ul><li>/on_status</li><li>awbNumber</li><li>phoneProxy</li></ul>
-        </article>
-
-        <article class="phase logi">
-          <span class="num">10</span>
-          <span class="tag">Logistics · transit</span>
-          <h3>Hub routing + live track</h3>
-          <p>JNE moves the parcel through its Jakarta hub (P2H2P topology). Pasar Sapa opens a <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">/track</code> session for live GPS, in addition to coarse status pushes.</p>
-          <ul><li>/track</li><li>/on_track</li><li>IN_TRANSIT</li><li>OUT_FOR_DELIVERY</li></ul>
-        </article>
-
-        <article class="phase">
-          <span class="num">11</span>
-          <span class="tag">Delivered</span>
-          <h3>Both contracts close</h3>
-          <p>JNE pushes <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--status);">DELIVERED</code> with a delivery-proof photo. BAP relays to the Trade BPP via <code style="font-family:JetBrains Mono,monospace;font-size:12px;">/update</code>; the Trade contract moves to COMPLETE. Andi gets a push.</p>
-          <ul><li>/on_status</li><li>deliveryProofUrl</li><li>contract → COMPLETE</li></ul>
-        </article>
-
-        <article class="phase user">
-          <span class="num">12</span>
-          <span class="tag">Rating</span>
-          <h3>Five dimensions, one act</h3>
-          <p>Andi rates once. Pasar Sapa splits it into Trade ratings (PROVIDER, ITEM) and Logistics ratings (FULFILLMENT_TIMELINESS, PACKAGE_CONDITION, AGENT_BEHAVIOUR).</p>
-          <ul><li>/rate</li><li>/on_rate</li><li>5 dimensions</li></ul>
-        </article>
-
-        <article class="phase">
-          <span class="num">13</span>
-          <span class="tag">Trade · reconcile</span>
-          <h3>Money, with proof</h3>
-          <p>BAP previews the settlement, then commits. The <code style="font-family:JetBrains Mono,monospace;font-size:12px;">/on_reconcile</code> carries PPN remittance, platform fee, and bukti potong references — everything an auditor needs.</p>
-          <ul><li>/reconcile</li><li>/on_reconcile</li><li>PPN · NTPN</li></ul>
-        </article>
-
-        <article class="phase logi">
-          <span class="num">14</span>
-          <span class="tag">Logistics · reconcile</span>
-          <h3>Batched, with FWA rebates</h3>
-          <p>Per-shipment reconcile doesn't scale at marketplace volume — Logistics settles in monthly batches with <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--logi);">isBatch=true</code>. The on_reconcile applies FWA volume rebates and any weight-dispute adjustments.</p>
-          <ul><li>isBatch</li><li>FWA rebate</li><li>weight adj.</li></ul>
-        </article>
-
-        <article class="keynote">
-          <b>The link is the whole point.</b>
-          <span style="color:var(--text-2);font-size:14px;">Every Logistics contract carries</span>
-          <code>contractAttributes.linkedContractId</code>
-          <span style="color:var(--text-2);font-size:14px;">— so when the BAP queries either side, the network can stitch the full story together: who bought what, who shipped it, what was charged, and what was settled.</span>
-        </article>
-
+  <footer class="foot">
+    <div class="page">
+      <div class="big">
+        Two contracts, <span class="rust ital">one identifier</span> — and
+        a transaction the auditor can read end-to-end.
       </div>
-    </section>
+      <div class="row">
+        <div>see also · <a href="/overview/transaction-with-payment/" style="color:inherit;text-decoration:underline;">+ Payment walk-through</a></div>
+        <div>compiled · trade × logistics · v1</div>
+      </div>
+    </div>
+  </footer>
 
-    <footer>
-      <span>Created and managed by <a href="https://apindo.or.id" target="_blank" rel="noopener">Apindo UMKM</a></span>
-      <span>
-        <a href="/overview/">Architecture overview</a>
-        &nbsp;·&nbsp;
-        <a href="#top">Back to top ↑</a>
-      </span>
-    </footer>
-  </main>
 </BaseLayout>
