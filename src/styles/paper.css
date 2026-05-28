@@ -93,6 +93,18 @@ body nav.top .links {
 body nav.top a { color: var(--muted); text-decoration: none; transition: color .15s; }
 body nav.top a:hover { color: var(--rust); }
 body nav.top a .n { color: var(--ink); margin-right: 6px; }
+body nav.top a.cross::before {
+  content: "\2197";
+  margin-right: 5px;
+  color: var(--rust);
+  opacity: 0.75;
+  font-size: 12px;
+}
+body nav.top .divider {
+  color: var(--line);
+  user-select: none;
+  font-weight: 300;
+}
 
 body header.hero { padding: 110px 0 80px; position: relative; overflow: hidden; }
 body header.hero .kicker { margin-bottom: 28px; }
