@@ -1,5 +1,5 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 const title = "Building a multi-store BPP + BAP · ION Network";
 const description = "How to build two ION adapters: a multi-tenant BPP that serves many stores (each doing their own shipping) and a BAP that aggregates listings into one buyer experience.";
@@ -19,8 +19,8 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
         <a href="#routing"><span class="n">06</span>routing</a>
         <a href="#ops"><span class="n">07</span>ops</a>
         <span class="divider">|</span>
-        <a class="cross" href="/overview/">architecture</a>
-        <a class="cross" href="/overview/how-onix-works/">onix</a>
+        <a class="cross" href="/">architecture</a>
+        <a class="cross" href="/how-onix-works/">onix</a>
       </div>
     </div>
   </nav>
@@ -396,7 +396,7 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
       </div>
 
       <p>
-        Compare this to the <a href="/overview/transaction/">Trade × Logistics walk-through</a>:
+        Compare this to the <a href="/transaction/">Trade × Logistics walk-through</a>:
         when shipping is a separate Beckn participant (JNE), it earns its
         own contract and the two link via
         <code>linkedContractId</code>. With in-house shipping, there is
@@ -687,7 +687,7 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
           <span class="path">storePayload</span>
           <span class="path">signAck · forward</span>
           <div class="label" style="margin-top:18px;">also see</div>
-          <span class="path"><a href="/overview/how-onix-works/" style="color:inherit;text-decoration:underline;">how onix works</a></span>
+          <span class="path"><a href="/how-onix-works/" style="color:inherit;text-decoration:underline;">how onix works</a></span>
         </aside>
       </div>
     </div>
@@ -771,7 +771,7 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
         store is the one carrying the parcel to the door.
       </div>
       <div class="row">
-        <div>see also · <a href="/overview/how-onix-works/" style="color:inherit;text-decoration:underline;">how onix works</a> · <a href="/overview/transaction/" style="color:inherit;text-decoration:underline;">trade × logistics walk-through</a></div>
+        <div>see also · <a href="/how-onix-works/" style="color:inherit;text-decoration:underline;">how onix works</a> · <a href="/transaction/" style="color:inherit;text-decoration:underline;">trade × logistics walk-through</a></div>
         <div>compiled · building multi-store · v1</div>
       </div>
     </div>
