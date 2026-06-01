@@ -115,8 +115,9 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
       </p>
       <p>
         The BAP finder fee defaults to 5% and the BPP cut to 3% — both yours to
-        set; PPN 11% applies only to a PKP seller; the QRIS MDR follows Bank
-        Indonesia's category schedule in <a href="#qris">§03</a>.
+        set, and either can be a <strong>flat rupiah fee</strong> instead of a
+        percentage; PPN 11% applies only to a PKP seller; the QRIS MDR follows
+        Bank Indonesia's category schedule in <a href="#qris">§03</a>.
       </p>
 
       <div class="calc">
@@ -145,12 +146,24 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
             <input id="c-deliv" type="number" min="0" step="1000" value="15000">
           </label>
           <label class="calc__field">
-            <span>BPP cut · %</span>
-            <input id="c-bpp" type="number" min="0" max="100" step="0.5" value="3">
+            <span>BPP cut</span>
+            <div class="calc__combo">
+              <select id="c-bpp-mode">
+                <option value="pct" selected>% of price</option>
+                <option value="flat">flat · IDR</option>
+              </select>
+              <input id="c-bpp" type="number" min="0" max="100" step="0.5" value="3">
+            </div>
           </label>
           <label class="calc__field">
-            <span>BAP finder fee · %</span>
-            <input id="c-finder" type="number" min="0" max="100" step="0.5" value="5">
+            <span>BAP finder fee</span>
+            <div class="calc__combo">
+              <select id="c-finder-mode">
+                <option value="pct" selected>% of price</option>
+                <option value="flat">flat · IDR</option>
+              </select>
+              <input id="c-finder" type="number" min="0" max="100" step="0.5" value="5">
+            </div>
           </label>
           <label class="calc__field">
             <span>ION network fee · IDR</span>
@@ -193,12 +206,12 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
             <tr>
               <td><span class="calc__dot calc__dot--bpp"></span>Provider app · BPP</td>
               <td class="calc__amt" id="o-bpp">—</td>
-              <td><span id="o-bpprate">—</span> of price — the PN's cut, an off-wire deal</td>
+              <td><span id="o-bpp-basis">—</span> — the PN's cut, an off-wire deal</td>
             </tr>
             <tr>
               <td><span class="calc__dot calc__dot--finder"></span>Buyer app · BAP</td>
               <td class="calc__amt" id="o-finder">—</td>
-              <td>finder fee · <span id="o-finderrate">—</span> — <code>buyerFinderFeeAmount</code></td>
+              <td>finder fee · <span id="o-finder-basis">—</span> — <code>buyerFinderFeeAmount</code></td>
             </tr>
             <tr>
               <td><span class="calc__dot calc__dot--qris"></span>QRIS acquirer</td>
@@ -513,6 +526,9 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
   }
   .calc__field select:focus,
   .calc__field input:focus { outline: none; border-color: var(--rust); }
+  .calc__combo { display: flex; gap: 6px; }
+  .calc__combo select { flex: 1 1 auto; min-width: 0; }
+  .calc__combo input { flex: 0 0 84px; width: 84px; }
 
   /* quote receipt */
   .calc__quote {
@@ -632,15 +648,26 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
   const PPN = 0.11, PPH = 0.005;
   const el = (id) => document.getElementById(id);
   const cat = el('c-cat'), vat = el('c-vat'), prod = el('c-product'), deliv = el('c-deliv'), bppEl = el('c-bpp'), finderEl = el('c-finder'), ionFeeEl = el('c-ion');
+  const bppMode = el('c-bpp-mode'), finderMode = el('c-finder-mode');
   const bar = el('c-bar'), cap = el('c-cap');
+
+  // A fee that's either a % of the product price or a flat rupiah amount.
+  // Returns { amount, basis } where basis is a human-readable label for the table.
+  const fee = (modeEl, valEl, product, noun) => {
+    const v = Math.max(0, Number(valEl.value) || 0);
+    if (modeEl.value === 'flat') {
+      const amount = Math.min(v, product);
+      return { amount, basis: `flat ${fmt(amount)}` };
+    }
+    const rate = Math.min(1, v / 100);
+    return { amount: product * rate, basis: `${pct(rate)}${noun}` };
+  };
 
   function recalc() {
     const isPkp = vat.value === 'pkp';
     const product = Math.max(0, Number(prod.value) || 0);
     const delivery = Math.max(0, Number(deliv.value) || 0);
     const ionFee = Math.max(0, Number(ionFeeEl.value) || 0);
-    const bppRate = Math.min(1, Math.max(0, (Number(bppEl.value) || 0) / 100));
-    const finderRate = Math.min(1, Math.max(0, (Number(finderEl.value) || 0) / 100));
 
     // PKP sellers charge PPN to the buyer (added to the quote); non-PKP charge none
     // but owe PPh final 0.5% on revenue (taken out of their own net).
@@ -650,9 +677,11 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
 
     const rate = mdr(cat.value, product);
     const qris = product * rate;
-    const finder = product * finderRate;
+    const bppFee = fee(bppMode, bppEl, product, ' of price');
+    const finderFee = fee(finderMode, finderEl, product, '');
+    const bpp = bppFee.amount;
+    const finder = finderFee.amount;
     const ion = Math.min(ionFee, product);
-    const bpp = product * bppRate;
     // netPayableToReceiver lands at the PN/BPP; the BPP keeps its cut, the merchant gets the rest.
     const merchant = Math.max(0, product - finder - qris - ion - bpp - pph);
 
@@ -666,9 +695,9 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
     // distribution table
     el('o-merchant').textContent = fmt(merchant);
     el('o-bpp').textContent = fmt(bpp);
-    el('o-bpprate').textContent = pct(bppRate);
+    el('o-bpp-basis').textContent = bppFee.basis;
     el('o-finder').textContent = fmt(finder);
-    el('o-finderrate').textContent = pct(finderRate);
+    el('o-finder-basis').textContent = finderFee.basis;
     el('o-qris').textContent = fmt(qris);
     el('o-ion').textContent = fmt(ion);
     el('o-pph').textContent = fmt(pph);
@@ -687,8 +716,16 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
 
     const sPct = product > 0 ? (merchant / product) * 100 : 0;
     const taxBit = isPkp ? `PPN ${fmt(ppn)} to buyer` : `PPh final ${fmt(pph)}`;
-    cap.textContent = `Merchant keeps ${sPct.toFixed(1)}% of the product price · BPP ${pct(bppRate)} · buyer paid IDR ${fmt(total)} · QRIS ${pct(rate)} · ${taxBit}`;
+    cap.textContent = `Merchant keeps ${sPct.toFixed(1)}% of the product price · BPP ${bppFee.basis.replace(' of price', '')} · BAP ${finderFee.basis} · buyer paid IDR ${fmt(total)} · QRIS ${pct(rate)} · ${taxBit}`;
   }
+
+  // Switching a fee between % and flat resets it to a sensible default for that basis.
+  const syncMode = (modeEl, valEl, pctDefault, flatDefault) => {
+    if (modeEl.value === 'flat') { valEl.step = '500'; valEl.removeAttribute('max'); valEl.value = String(flatDefault); }
+    else { valEl.step = '0.5'; valEl.max = '100'; valEl.value = String(pctDefault); }
+  };
+  bppMode.addEventListener('change', () => { syncMode(bppMode, bppEl, 3, 3000); recalc(); });
+  finderMode.addEventListener('change', () => { syncMode(finderMode, finderEl, 5, 5000); recalc(); });
 
   [cat, vat, prod, deliv, bppEl, finderEl, ionFeeEl].forEach((e) => e.addEventListener('input', recalc));
   recalc();
