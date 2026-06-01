@@ -40,5 +40,16 @@ const resolvedCanonicalUrl = canonicalUrl ? new URL(canonicalUrl, Astro.site ?? 
   </head>
   <body class={bodyClass}>
     <slot />
+    <script>
+      // On mobile the doc-switcher scrolls horizontally; centre the current
+      // page's link within its row — scrolling only the row, never the page.
+      const active = document.querySelector('nav.top a.here');
+      if (active) {
+        const row = active.parentElement;
+        const a = active.getBoundingClientRect();
+        const r = row.getBoundingClientRect();
+        row.scrollLeft += (a.left - r.left) - (r.width - a.width) / 2;
+      }
+    </script>
   </body>
 </html>

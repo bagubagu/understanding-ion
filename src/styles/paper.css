@@ -613,3 +613,25 @@ body footer.foot .apindo-credit .apindo-full {
 
 body .reveal { opacity: 0; transform: translateY(8px); transition: opacity .7s, transform .7s; }
 body .reveal.in { opacity: 1; transform: none; }
+
+/* mobile: collapse the sticky header — brand stacks above a single-line,
+   horizontally-scrollable doc row; each nav row scrolls sideways instead of
+   wrapping to many lines. Placed last so it wins source-order over the base
+   nav rules above. */
+@media (max-width: 700px) {
+  body nav.top .inner { flex-direction: column; align-items: stretch; gap: 9px; padding: 12px 20px; }
+  body nav.docbar .inner { align-items: center; gap: 12px; padding: 9px 20px; }
+  body nav.top .links,
+  body nav.docbar .docs {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  body nav.top .links::-webkit-scrollbar,
+  body nav.docbar .docs::-webkit-scrollbar { display: none; }
+  body nav.top .links a,
+  body nav.docbar .docs a { white-space: nowrap; }
+}
