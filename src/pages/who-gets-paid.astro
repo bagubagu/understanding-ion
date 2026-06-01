@@ -31,10 +31,9 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
         <span class="ital">paid.</span>
       </h1>
       <p class="lede">
-        One storefront checkout, to the rupiah. The buyer pays product +
-        delivery + tax; delivery and tax pass straight through; and the
-        <em>product price</em> — a price the merchant set to cover every cut —
-        is split five ways.
+        One checkout. Buyer pays product + delivery + tax. Delivery and tax pass
+        straight through; the <em>product price</em> — set by the merchant to
+        cover every cut — splits five ways.
       </p>
 
       <div class="meta">
@@ -67,17 +66,14 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
       </div>
       <h2>The quote the <span class="ital">buyer pays.</span></h2>
       <p class="standfirst">
-        A storefront sale moves in two stages. First the buyer is
-        <strong>quoted</strong> the seller's price plus delivery plus tax —
-        itemized — and pays the lot by <strong>QRIS</strong>. Then the money
-        separates: delivery and tax pass straight through to the
-        <strong>courier</strong> and the <strong>state</strong>, and only the
-        <strong>product price</strong> is shared among the network's parties.
+        Two stages. First the buyer is <strong>quoted</strong> seller's price +
+        delivery + tax, itemized, paid by <strong>QRIS</strong>. Then it
+        separates: delivery → <strong>courier</strong>, tax → <strong>state</strong>,
+        product price → the network.
       </p>
 
       <p>
-        The seller publishes a product price; the buyer app (BAP) shows it. At
-        checkout the quote is built up, itemized, and collected in one QRIS
+        Seller publishes the price, BAP shows it. At checkout, one itemized QRIS
         payment:
       </p>
 
@@ -89,13 +85,11 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
   <span class="k">Buyer pays</span>         <span class="s">126,000</span>   <span class="c">← one QRIS payment</span></pre>
 
       <p>
-        <strong>Delivery</strong> is a pass-through to the courier.
-        <strong>PPN</strong> is a pass-through to the state — but only a
-        <strong>PKP</strong> seller (annual turnover above Rp 4.8 bn) charges
-        it; a smaller UMKM seller charges <em>no PPN at all</em> (it owes a 0.5%
-        final income tax instead, out of its own take — see <a href="#qris">§03</a>).
-        Either way, what the network parties divide is the
-        <strong>product price</strong>.
+        <strong>Delivery</strong> → courier. <strong>PPN</strong> → state, but
+        only a <strong>PKP</strong> seller (turnover above Rp 4.8 bn) charges it;
+        a smaller UMKM charges <em>no PPN</em> (owes 0.5% income tax instead, from
+        its own take — see <a href="#qris">§03</a>). Either way, the network
+        divides the <strong>product price</strong>.
       </p>
     </div>
   </section>
@@ -109,15 +103,12 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
       </div>
       <h2>The product price, <span class="ital">shared five ways.</span></h2>
       <p class="standfirst">
-        Once paid, the product price is shared five ways. Pick the seller's
-        category and set the amounts — the quote, every fee, and both views
-        below recompute live.
+        Pick the category, set the amounts — everything below recomputes live.
       </p>
       <p>
-        The BAP finder fee defaults to 5% and the BPP cut to 3% — both yours to
-        set, and either can be a <strong>flat rupiah fee</strong> instead of a
-        percentage; PPN 11% applies only to a PKP seller; the QRIS MDR follows
-        Bank Indonesia's category schedule in <a href="#qris">§03</a>.
+        BAP finder fee defaults to 5%, BPP cut to 3% — both yours to set, as a %
+        or a <strong>flat rupiah fee</strong>. PPN 11% only if PKP. QRIS MDR by
+        category (<a href="#qris">§03</a>).
       </p>
 
       <div class="calc">
@@ -193,6 +184,7 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
           <p class="calc__cap" id="c-cap"></p>
         </figure>
 
+        <div class="t-scroll">
         <table class="calc__table">
           <thead>
             <tr><th>Party</th><th>Gets · IDR</th><th>Rate / basis</th></tr>
@@ -235,47 +227,41 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
 
       <div class="note">
         <span class="note__tag">Reading it</span>
         <p>
-          The courier and the state are not in this split — they were paid in
-          the quote. What is left, the product price, goes mostly to the
-          <strong>merchant</strong>; its <strong>provider app (BPP)</strong>,
-          the <strong>buyer app</strong>, the <strong>QRIS acquirer</strong> and
-          <strong>ION</strong> take the rest. The <strong>merchant + BPP</strong>
-          rows together are what actually lands at the Provider Node
-          (<code>netPayableToReceiver</code>) — the network pays the PN, which
-          keeps its cut and passes the balance to the merchant. Switch the seller
-          to <strong>UMI</strong> on an order ≤ 500,000 and the QRIS slice drops
-          to <strong>0</strong>; raise the BPP cut and watch it eat into the
-          merchant's net.
+          Courier and state aren't here — paid in the quote. What's left, the
+          product price, goes mostly to the <strong>merchant</strong>; the
+          <strong>BPP</strong>, <strong>buyer app</strong>, <strong>QRIS
+          acquirer</strong> and <strong>ION</strong> take the rest.
+          <strong>Merchant + BPP</strong> together land at the Provider Node
+          (<code>netPayableToReceiver</code>) — the network pays the PN, it keeps
+          its cut, passes the rest on. UMI seller, order ≤ 500,000 → QRIS slice
+          drops to <strong>0</strong>. Raise the BPP cut → eats the merchant's net.
         </p>
       </div>
 
       <div class="note">
         <span class="note__tag">A fee, not a commission</span>
         <p>
-          ION's slice is a <strong>flat network fee</strong> — a fixed rupiah
-          amount per order that pays for the Fabric (registry, gateway,
-          cataloging) and the team that runs it. It is <em>not</em> a
-          <strong>commission</strong>: it does not grow with the order's value,
-          so it is a rounding error on a large sale and never a percentage tax on
-          the seller's GMV. That is the whole point of the model — the network
-          funds itself the way a stock exchange charges a flat trade fee, not the
-          way a marketplace takes a cut. (ONDC runs the same way: a flat ₹1.5 per
-          transaction.)
+          ION's slice is a <strong>flat fee</strong> — fixed rupiah per order,
+          funding the Fabric (registry, gateway, cataloging) and its team.
+          <em>Not</em> a <strong>commission</strong>: it doesn't grow with order
+          value, so it's a rounding error on big sales, never a % of GMV. Like a
+          stock exchange's flat trade fee, not a marketplace cut. (ONDC: flat ₹1.5
+          per txn.)
         </p>
       </div>
 
       <div class="note">
         <span class="note__tag">On a bad day</span>
         <p>
-          If the seller <em>breaks a service promise</em> — ships late, sends the
-          wrong item — an <code>slaPenaltyDeduction</code> also comes out of its
-          net. The calculator assumes a clean order, so it is <strong>0</strong>
-          here.
+          Break a service promise — late, wrong item — and an
+          <code>slaPenaltyDeduction</code> also hits the net. Clean order here, so
+          <strong>0</strong>.
         </p>
       </div>
     </div>
@@ -290,12 +276,12 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
       </div>
       <h2>The QRIS fee is <span class="ital">not flat.</span></h2>
       <p class="standfirst">
-        Bank Indonesia sets it by the <strong>merchant's category</strong>, and
-        for the smallest sellers it also depends on the <strong>ticket
-        size</strong>. It is the <em>seller's</em> classification that decides the
-        rate, not the price of the item.
+        Bank Indonesia sets it by <strong>merchant category</strong> — and for the
+        smallest sellers, by <strong>ticket size</strong> too. The
+        <em>seller's</em> class decides the rate, not the item's price.
       </p>
 
+      <div class="t-scroll">
       <table class="ref-table">
         <thead>
           <tr><th>Seller category</th><th>Txn ≤ 500,000</th><th>Txn &gt; 500,000</th></tr>
@@ -306,34 +292,30 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
           <tr><td><strong>Public service</strong><br><span class="muted">G2P, taxes, donations</span></td><td>0%</td><td>0%</td></tr>
         </tbody>
       </table>
+      </div>
 
       <div class="note">
         <span class="note__tag">Reading the table</span>
         <p>
-          The 0% is <em>not</em> "any item under 500,000 is free." It applies only
-          to a <strong>micro (UMI)</strong> seller, and only up to 500,000 — above
-          that they pay 0.3%. A <strong>regular shop or enterprise pays 0.7% on
-          every sale</strong>, whatever the amount; the 500,000 line does not exist
-          for them. So the same IDR 300,000 item is free through a UMI warung but
-          costs 2,100 through a big retailer. Rates effective 15 March 2025, set by
-          Bank Indonesia — and by BI rule the merchant always bears the QRIS MDR;
-          it cannot be passed to the buyer.
+          0% isn't "any item under 500,000 is free." Only a <strong>micro
+          (UMI)</strong> seller, only up to 500,000 — above that, 0.3%. A
+          <strong>regular shop or enterprise pays 0.7% on every sale</strong>, no
+          threshold. Same 300,000 item: free via a UMI warung, 2,100 via a big
+          retailer. Rates from 15 March 2025; by BI rule the merchant always bears
+          the MDR, never the buyer.
         </p>
       </div>
 
       <div class="note">
         <span class="note__tag">Who even charges PPN</span>
         <p>
-          Not every seller. PPN is collected only by a <strong>PKP</strong>
-          (<em>Pengusaha Kena Pajak</em>, VAT-registered) — and you become PKP only
-          once annual turnover passes <strong>Rp 4.8 billion</strong>. Below that, a
-          seller is <strong>non-PKP</strong> and charges <strong>no PPN</strong>: a
-          UMI warung's quote has no VAT line at all. Such sellers aren't tax-free
-          though — they owe <strong>PPh Final 0.5%</strong> of revenue (PP 23/2018),
-          which comes out of <em>their</em> take, not the buyer's quote. Flip the
-          <strong>VAT status</strong> control to see both. (Note: PKP status and the
-          QRIS category above are separate classifications — a seller can be small on
-          one and not the other.)
+          Not every seller. Only a <strong>PKP</strong> (<em>Pengusaha Kena
+          Pajak</em>, VAT-registered) collects PPN — and you're PKP only past
+          <strong>Rp 4.8 bn</strong> turnover. Below that: <strong>non-PKP</strong>,
+          <strong>no PPN</strong>, no VAT line. Not tax-free though — they owe
+          <strong>PPh Final 0.5%</strong> of revenue (PP 23/2018), from their take,
+          not the buyer's. Flip <strong>VAT status</strong> to compare. (PKP and
+          QRIS category are separate classifications.)
         </p>
       </div>
     </div>
@@ -349,7 +331,7 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
       <h2>Five shares, <span class="ital">each for a job.</span></h2>
       <p class="standfirst">
         Seven parties touch the money; five take a share of the <em>product
-        price</em>, each for a distinct job.
+        price</em>, each for a job.
       </p>
 
       <div class="plug-cat">
@@ -383,12 +365,11 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
       </div>
 
       <p>
-        The rest is not anyone's revenue: the <strong>courier</strong> is paid the
-        delivery line, and the <strong>state</strong> is paid the tax —
-        <strong>PPN</strong> in the buyer's quote if the seller is PKP, or a
-        <strong>0.5% PPh final</strong> out of the merchant's net if it isn't. The
-        full settlement anatomy is worked end-to-end in the
-        <a href="/transaction-with-payment/">trade × payment × logistics</a> example.
+        The rest isn't revenue: the <strong>courier</strong> gets the delivery
+        line, the <strong>state</strong> the tax — <strong>PPN</strong> in the
+        quote if PKP, or <strong>0.5% PPh</strong> from the merchant's net if not.
+        Full settlement anatomy:
+        <a href="/transaction-with-payment/">trade × payment × logistics</a>.
       </p>
     </div>
   </section>
@@ -397,8 +378,8 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
   <footer class="foot">
     <div class="page">
       <div class="big">
-        Delivery and tax pass straight through — what the network splits is just
-        <span class="rust ital">the product price the merchant set to cover every cut.</span>
+        Delivery and tax pass through. What the network splits is just
+        <span class="rust ital">the product price — set to cover every cut.</span>
       </div>
       <div class="row">
         <div>compiled · ion-network · who-gets-paid</div>
@@ -479,6 +460,10 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
   .calc__table strong { color: var(--ink); }
   .ref-table th:not(:first-child),
   .ref-table td:not(:first-child) { text-align: right; white-space: nowrap; }
+
+  /* tables scroll inside their own box on narrow screens instead of
+     pushing the page sideways (the basis column holds unbreakable code) */
+  .t-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   .muted {
     font-family: "JetBrains Mono", monospace;
@@ -633,6 +618,11 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
 
   @media (max-width: 700px) {
     .note { grid-template-columns: 1fr; gap: 8px; }
+  }
+  @media (max-width: 600px) {
+    .calc { padding: 16px; }
+    .calc__table th, .calc__table td,
+    .ref-table th, .ref-table td { padding: 9px 10px; }
   }
 </style>
 
