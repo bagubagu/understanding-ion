@@ -16,6 +16,15 @@ const description = "A worked example: a consumer buys a smartphone on Pasar Sap
     <div class="inner">
       <div class="brand" style="white-space:nowrap;">trade <span class="dot">●</span> payment <span class="dot">●</span> logistics</div>
       <div class="links">
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+      </div>
+    </div>
+  </nav>
+
+  <nav class="docbar">
+    <div class="inner">
+      <span class="lbl">On this page</span>
+      <div class="docs">
         <a href="#picture"><span class="n">01</span>picture</a>
         <a href="#catalog"><span class="n">02</span>catalog</a>
         <a href="#trade"><span class="n">03</span>trade</a>
@@ -23,15 +32,6 @@ const description = "A worked example: a consumer buys a smartphone on Pasar Sap
         <a href="#logistics"><span class="n">05</span>logistics</a>
         <a href="#delivery"><span class="n">06</span>delivery</a>
         <a href="#settle"><span class="n">07</span>settlement</a>
-      </div>
-    </div>
-  </nav>
-
-  <nav class="docbar">
-    <div class="inner">
-      <span class="lbl">Docs</span>
-      <div class="docs">
-        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
       </div>
     </div>
   </nav>

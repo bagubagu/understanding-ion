@@ -16,19 +16,19 @@ const description = "How a storefront checkout splits. The buyer is quoted produ
     <div class="inner">
       <div class="brand">who <span class="dot">●</span> gets paid</div>
       <div class="links">
-        <a href="#quote"><span class="n">01</span>quote</a>
-        <a href="#split"><span class="n">02</span>split</a>
-        <a href="#qris"><span class="n">03</span>qris</a>
-        <a href="#keeps"><span class="n">04</span>who keeps what</a>
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
       </div>
     </div>
   </nav>
 
   <nav class="docbar">
     <div class="inner">
-      <span class="lbl">Docs</span>
+      <span class="lbl">On this page</span>
       <div class="docs">
-        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+        <a href="#quote"><span class="n">01</span>quote</a>
+        <a href="#split"><span class="n">02</span>split</a>
+        <a href="#qris"><span class="n">03</span>qris</a>
+        <a href="#keeps"><span class="n">04</span>who keeps what</a>
       </div>
     </div>
   </nav>

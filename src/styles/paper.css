@@ -99,6 +99,7 @@ body nav.docbar .docs {
 body nav.docbar a { color: var(--muted); text-decoration: none; transition: color .15s; }
 body nav.docbar a:hover { color: var(--rust); }
 body nav.docbar a.here { color: var(--rust); font-weight: 600; }
+body nav.docbar a .n { color: var(--ink); margin-right: 6px; }
 body nav.top .inner {
   max-width: var(--max);
   margin: 0 auto;
@@ -123,6 +124,7 @@ body nav.top .links {
 body nav.top a { color: var(--muted); text-decoration: none; transition: color .15s; }
 body nav.top a:hover { color: var(--rust); }
 body nav.top a .n { color: var(--ink); margin-right: 6px; }
+body nav.top a.here { color: var(--rust); font-weight: 600; }
 body nav.top a.cross::before {
   content: "\2197";
   margin-right: 5px;

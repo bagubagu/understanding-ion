@@ -16,6 +16,15 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
     <div class="inner">
       <div class="brand">building <span class="dot">●</span> bpp + bap</div>
       <div class="links">
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+      </div>
+    </div>
+  </nav>
+
+  <nav class="docbar">
+    <div class="inner">
+      <span class="lbl">On this page</span>
+      <div class="docs">
         <a href="#picture"><span class="n">01</span>picture</a>
         <a href="#halves"><span class="n">02</span>two halves</a>
         <a href="#tenants"><span class="n">03</span>tenants</a>
@@ -24,15 +33,6 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
         <a href="#lifecycle"><span class="n">06</span>lifecycle</a>
         <a href="#routing"><span class="n">07</span>routing</a>
         <a href="#ops"><span class="n">08</span>ops</a>
-      </div>
-    </div>
-  </nav>
-
-  <nav class="docbar">
-    <div class="inner">
-      <span class="lbl">Docs</span>
-      <div class="docs">
-        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
       </div>
     </div>
   </nav>

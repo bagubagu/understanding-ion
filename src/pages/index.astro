@@ -16,21 +16,21 @@ const description = "A reference architecture for the ION Network — governance
     <div class="inner">
       <div class="brand">the <span class="dot">●</span> ion network</div>
       <div class="links">
-        <a href="#picture"><span class="n">01</span>picture</a>
-        <a href="#governance"><span class="n">02</span>governance</a>
-        <a href="#profile"><span class="n">03</span>profile</a>
-        <a href="#services"><span class="n">04</span>services</a>
-        <a href="#participants"><span class="n">05</span>participants</a>
-        <a href="#protocol"><span class="n">06</span>protocol</a>
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
       </div>
     </div>
   </nav>
 
   <nav class="docbar">
     <div class="inner">
-      <span class="lbl">Docs</span>
+      <span class="lbl">On this page</span>
       <div class="docs">
-        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+        <a href="#picture"><span class="n">01</span>picture</a>
+        <a href="#governance"><span class="n">02</span>governance</a>
+        <a href="#profile"><span class="n">03</span>profile</a>
+        <a href="#services"><span class="n">04</span>services</a>
+        <a href="#participants"><span class="n">05</span>participants</a>
+        <a href="#protocol"><span class="n">06</span>protocol</a>
       </div>
     </div>
   </nav>
