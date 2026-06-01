@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { lastUpdated } from '../lib/last-updated.js';
+import { docs } from '../lib/docs.js';
+const updated = lastUpdated('src/pages/building-multi-store.astro');
+const here = '/building-multi-store/';
 
 const title = "Building a multi-store BPP + BAP · ION Network";
 const description = "How to build two ION adapters: a multi-tenant BPP that serves many stores (each doing their own shipping) and a BAP that aggregates listings into one buyer experience.";
@@ -7,6 +11,7 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
 
 <BaseLayout title={title} description={description}>
 
+  <header class="sitehead">
   <nav class="top">
     <div class="inner">
       <div class="brand">building <span class="dot">●</span> bpp + bap</div>
@@ -19,13 +24,19 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
         <a href="#lifecycle"><span class="n">06</span>lifecycle</a>
         <a href="#routing"><span class="n">07</span>routing</a>
         <a href="#ops"><span class="n">08</span>ops</a>
-        <span class="divider">|</span>
-        <a class="cross" href="/building-multi-store-with-bpp-logistic/">+ 3pl</a>
-        <a class="cross" href="/">architecture</a>
-        <a class="cross" href="/how-onix-works/">onix</a>
       </div>
     </div>
   </nav>
+
+  <nav class="docbar">
+    <div class="inner">
+      <span class="lbl">Docs</span>
+      <div class="docs">
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+      </div>
+    </div>
+  </nav>
+  </header>
 
   <header class="hero">
     <div class="page">
@@ -941,6 +952,7 @@ const description = "How to build two ION adapters: a multi-tenant BPP that serv
 
   <footer class="foot">
     <div class="page">
+      <div class="foot-updated smallcaps">Last updated · {updated}</div>
       <div class="apindo-credit">
         <a class="apindo-mark" href="https://apindo.or.id" target="_blank" rel="noopener" aria-label="APINDO">
           <img src="/apindo-logo.png" alt="" width="68" height="68" />

@@ -17,7 +17,7 @@ body { box-sizing: border-box; }
 *,
 *::before,
 *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 104px; }
 body {
   margin: 0;
   background: var(--paper);
@@ -62,13 +62,43 @@ body .page { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
 body .col   { max-width: var(--col); margin: 0 auto; }
 body .full  { max-width: 100%; }
 
+/* sticky two-row header: page-section nav + doc switcher, pinned together */
+body header.sitehead { position: sticky; top: 0; z-index: 50; }
+
 body nav.top {
-  position: sticky; top: 0; z-index: 50;
   background: rgba(241, 234, 216, 0.92);
   backdrop-filter: saturate(140%) blur(6px);
   -webkit-backdrop-filter: saturate(140%) blur(6px);
   border-bottom: 1px solid var(--line);
 }
+
+/* doc switcher — the row that moves between documents */
+body nav.docbar {
+  background: rgba(241, 234, 216, 0.92);
+  backdrop-filter: saturate(140%) blur(6px);
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+body nav.docbar .inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 9px 32px;
+  display: flex; align-items: baseline; gap: 20px;
+}
+body nav.docbar .lbl {
+  flex: 0 0 auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--rust);
+}
+body nav.docbar .docs {
+  display: flex; flex-wrap: wrap; gap: 7px 20px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+}
+body nav.docbar a { color: var(--muted); text-decoration: none; transition: color .15s; }
+body nav.docbar a:hover { color: var(--rust); }
+body nav.docbar a.here { color: var(--rust); font-weight: 600; }
 body nav.top .inner {
   max-width: var(--max);
   margin: 0 auto;
@@ -529,10 +559,11 @@ body footer.foot .big {
   line-height: 1.15;
 }
 body footer.foot .big .rust { color: var(--rust); }
+body footer.foot .foot-updated {
+  color: var(--muted);
+  margin-bottom: 30px;
+}
 body footer.foot .apindo-credit {
-  margin-top: 28px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
   display: flex;
   align-items: center;
   gap: 18px;

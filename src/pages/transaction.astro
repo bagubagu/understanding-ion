@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { lastUpdated } from '../lib/last-updated.js';
+import { docs } from '../lib/docs.js';
+const updated = lastUpdated('src/pages/transaction.astro');
+const here = '/transaction/';
 
 const title = "End-to-end transaction · ION Network";
 const description = "A worked example: a consumer buys a smartphone on Pasar Sapa from a Jakarta merchant, fulfilled by JNE — visualised across the Trade and Logistics sectors of the ION Network.";
@@ -7,6 +11,7 @@ const description = "A worked example: a consumer buys a smartphone on Pasar Sap
 
 <BaseLayout title={title} description={description}>
 
+  <header class="sitehead">
   <nav class="top">
     <div class="inner">
       <div class="brand">trade <span class="dot">●</span> logistics</div>
@@ -17,13 +22,19 @@ const description = "A worked example: a consumer buys a smartphone on Pasar Sap
         <a href="#logistics"><span class="n">04</span>logistics</a>
         <a href="#delivery"><span class="n">05</span>delivery</a>
         <a href="#settle"><span class="n">06</span>settlement</a>
-        <span class="divider">|</span>
-        <a class="cross" href="/">architecture</a>
-        <a class="cross" href="/transaction-with-payment/">+ payment</a>
-        <a class="cross" href="/how-onix-works/">onix</a>
       </div>
     </div>
   </nav>
+
+  <nav class="docbar">
+    <div class="inner">
+      <span class="lbl">Docs</span>
+      <div class="docs">
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+      </div>
+    </div>
+  </nav>
+  </header>
 
   <header class="hero">
     <div class="page">
@@ -491,6 +502,7 @@ const description = "A worked example: a consumer buys a smartphone on Pasar Sap
 
   <footer class="foot">
     <div class="page">
+      <div class="foot-updated smallcaps">Last updated · {updated}</div>
       <div class="apindo-credit">
         <a class="apindo-mark" href="https://apindo.or.id" target="_blank" rel="noopener" aria-label="APINDO">
           <img src="/apindo-logo.png" alt="" width="68" height="68" />

@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { lastUpdated } from '../lib/last-updated.js';
+import { docs } from '../lib/docs.js';
+const updated = lastUpdated('src/pages/building-multi-store-with-bpp-logistic.astro');
+const here = '/building-multi-store-with-bpp-logistic/';
 
 const title = "Building a multi-store BPP + BAP with a Logistics BPP · ION Network";
 const description = "How the marketplace BAP arranges carriage through a separate Logistics BPP (JNE): per-store Trade contracts each linked to their own Logistics contract by linkedContractId, with BAP-collected escrow paying both the stores and the carrier.";
@@ -7,6 +11,7 @@ const description = "How the marketplace BAP arranges carriage through a separat
 
 <BaseLayout title={title} description={description}>
 
+  <header class="sitehead">
   <nav class="top">
     <div class="inner">
       <div class="brand">building <span class="dot">●</span> bpp + bap + 3pl</div>
@@ -19,13 +24,19 @@ const description = "How the marketplace BAP arranges carriage through a separat
         <a href="#lifecycle"><span class="n">06</span>lifecycle</a>
         <a href="#routing"><span class="n">07</span>routing</a>
         <a href="#ops"><span class="n">08</span>ops</a>
-        <span class="divider">|</span>
-        <a class="cross" href="/building-multi-store/">in-house</a>
-        <a class="cross" href="/transaction/">trade × logistics</a>
-        <a class="cross" href="/how-onix-works/">onix</a>
       </div>
     </div>
   </nav>
+
+  <nav class="docbar">
+    <div class="inner">
+      <span class="lbl">Docs</span>
+      <div class="docs">
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+      </div>
+    </div>
+  </nav>
+  </header>
 
   <header class="hero">
     <div class="page">
@@ -946,6 +957,7 @@ const description = "How the marketplace BAP arranges carriage through a separat
 
   <footer class="foot">
     <div class="page">
+      <div class="foot-updated smallcaps">Last updated · {updated}</div>
       <div class="apindo-credit">
         <a class="apindo-mark" href="https://apindo.or.id" target="_blank" rel="noopener" aria-label="APINDO">
           <img src="/apindo-logo.png" alt="" width="68" height="68" />
