@@ -1,0 +1,695 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = "Who gets paid · ION Network";
+const description = "How a storefront checkout splits. The buyer is quoted product price + delivery + tax, itemized, and pays by QRIS. Delivery and tax pass straight through to the courier and the state; the product price is then shared between the merchant, its provider app (BPP), the buyer app (BAP), the payment gateway, and ION — a price the merchant set to cover every cut.";
+---
+
+<BaseLayout title={title} description={description}>
+
+  <nav class="top">
+    <div class="inner">
+      <div class="brand">who <span class="dot">●</span> gets paid</div>
+      <div class="links">
+        <a href="#quote"><span class="n">01</span>quote</a>
+        <a href="#split"><span class="n">02</span>split</a>
+        <a href="#qris"><span class="n">03</span>qris</a>
+        <a href="#keeps"><span class="n">04</span>who keeps what</a>
+        <span class="divider">|</span>
+        <a class="cross" href="/">architecture</a>
+        <a class="cross" href="/transaction-with-payment/">+ payment</a>
+        <a class="cross" href="/how-onix-works/">onix</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="page">
+      <div class="kicker smallcaps">Guides · Storefront settlement · IDR</div>
+      <h1>
+        Who <span class="acc ital">gets</span><br/>
+        <span class="ital">paid.</span>
+      </h1>
+      <p class="lede">
+        One storefront checkout, to the rupiah. The buyer pays product +
+        delivery + tax; delivery and tax pass straight through; and the
+        <em>product price</em> — a price the merchant set to cover every cut —
+        is split five ways.
+      </p>
+
+      <div class="meta">
+        <div class="item">
+          <div class="v">2</div>
+          <div class="l smallcaps">Stages</div>
+        </div>
+        <div class="item">
+          <div class="v">5-way</div>
+          <div class="l smallcaps">Product split</div>
+        </div>
+        <div class="item">
+          <div class="v">QRIS</div>
+          <div class="l smallcaps">One payment</div>
+        </div>
+        <div class="item">
+          <div class="v">Flat fee</div>
+          <div class="l smallcaps">ION's cut</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <section id="quote">
+    <div class="page">
+      <div class="head">
+        <span class="num">01</span>
+        <span class="tag">Stage 1 · the quote the buyer pays</span>
+      </div>
+      <h2>The quote the <span class="ital">buyer pays.</span></h2>
+      <p class="standfirst">
+        A storefront sale moves in two stages. First the buyer is
+        <strong>quoted</strong> the seller's price plus delivery plus tax —
+        itemized — and pays the lot by <strong>QRIS</strong>. Then the money
+        separates: delivery and tax pass straight through to the
+        <strong>courier</strong> and the <strong>state</strong>, and only the
+        <strong>product price</strong> is shared among the network's parties.
+      </p>
+
+      <p>
+        The seller publishes a product price; the buyer app (BAP) shows it. At
+        checkout the quote is built up, itemized, and collected in one QRIS
+        payment:
+      </p>
+
+      <pre><span class="c"># quote shown to the buyer (seller is PKP)</span>
+  <span class="k">Product price</span>      <span class="s">100,000</span>   <span class="c">← seller's published price</span>
+<span class="k">+ Delivery</span>            <span class="s">15,000</span>   <span class="c">← logistics, passed to the courier</span>
+<span class="k">+ PPN (VAT 11%)</span>       <span class="s">11,000</span>   <span class="c">← tax — only if the seller is PKP</span>
+  <span class="c">─────────────────────────────</span>
+  <span class="k">Buyer pays</span>         <span class="s">126,000</span>   <span class="c">← one QRIS payment</span></pre>
+
+      <p>
+        <strong>Delivery</strong> is a pass-through to the courier.
+        <strong>PPN</strong> is a pass-through to the state — but only a
+        <strong>PKP</strong> seller (annual turnover above Rp 4.8 bn) charges
+        it; a smaller UMKM seller charges <em>no PPN at all</em> (it owes a 0.5%
+        final income tax instead, out of its own take — see <a href="#qris">§03</a>).
+        Either way, what the network parties divide is the
+        <strong>product price</strong>.
+      </p>
+    </div>
+  </section>
+
+
+  <section id="split">
+    <div class="page">
+      <div class="head">
+        <span class="num">02</span>
+        <span class="tag">Stage 2 · how the product price is split</span>
+      </div>
+      <h2>The product price, <span class="ital">shared five ways.</span></h2>
+      <p class="standfirst">
+        Once paid, the product price is shared five ways. Pick the seller's
+        category and set the amounts — the quote, every fee, and both views
+        below recompute live.
+      </p>
+      <p>
+        The BAP finder fee defaults to 5% and the BPP cut to 3% — both yours to
+        set; PPN 11% applies only to a PKP seller; the QRIS MDR follows Bank
+        Indonesia's category schedule in <a href="#qris">§03</a>.
+      </p>
+
+      <div class="calc">
+        <div class="calc__controls">
+          <label class="calc__field">
+            <span>Seller category</span>
+            <select id="c-cat">
+              <option value="umi">Micro — UMI (warung)</option>
+              <option value="reg" selected>Small / Medium / Large</option>
+              <option value="pub">Public service / G2P</option>
+            </select>
+          </label>
+          <label class="calc__field">
+            <span>VAT status</span>
+            <select id="c-vat">
+              <option value="pkp" selected>PKP — charges 11% PPN</option>
+              <option value="non">Non-PKP — PPh final 0.5%</option>
+            </select>
+          </label>
+          <label class="calc__field">
+            <span>Product price · IDR</span>
+            <input id="c-product" type="number" min="0" step="1000" value="100000">
+          </label>
+          <label class="calc__field">
+            <span>Delivery · IDR</span>
+            <input id="c-deliv" type="number" min="0" step="1000" value="15000">
+          </label>
+          <label class="calc__field">
+            <span>BPP cut · %</span>
+            <input id="c-bpp" type="number" min="0" max="100" step="0.5" value="3">
+          </label>
+          <label class="calc__field">
+            <span>BAP finder fee · %</span>
+            <input id="c-finder" type="number" min="0" max="100" step="0.5" value="5">
+          </label>
+          <label class="calc__field">
+            <span>ION network fee · IDR</span>
+            <input id="c-ion" type="number" min="0" step="50" value="300">
+          </label>
+        </div>
+
+        <!-- quote -->
+        <div class="calc__quote">
+          <div class="calc__qrow"><span>Product price</span><b id="q-product">—</b></div>
+          <div class="calc__qrow"><span>+ Delivery <i>→ courier</i></span><b id="q-deliv">—</b></div>
+          <div class="calc__qrow" id="q-ppn-row"><span>+ PPN 11% <i>→ state</i></span><b id="q-ppn">—</b></div>
+          <div class="calc__qrow calc__qrow--total"><span>Buyer pays · QRIS</span><b id="q-total">—</b></div>
+        </div>
+
+        <!-- distribution of the product price -->
+        <p class="calc__lbl">The product price, shared</p>
+        <figure class="paybar" aria-hidden="true">
+          <div class="paybar__track" id="c-bar">
+            <div class="paybar__seg paybar__seg--merchant" data-seg="merchant"><span></span></div>
+            <div class="paybar__seg paybar__seg--bpp"    data-seg="bpp"><span></span></div>
+            <div class="paybar__seg paybar__seg--finder" data-seg="finder"><span></span></div>
+            <div class="paybar__seg paybar__seg--qris"   data-seg="qris"><span></span></div>
+            <div class="paybar__seg paybar__seg--ion"    data-seg="ion"><span></span></div>
+            <div class="paybar__seg paybar__seg--pph"    data-seg="pph"><span></span></div>
+          </div>
+          <p class="calc__cap" id="c-cap"></p>
+        </figure>
+
+        <table class="calc__table">
+          <thead>
+            <tr><th>Party</th><th>Gets · IDR</th><th>Rate / basis</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="calc__dot calc__dot--merchant"></span><strong>Merchant</strong> <span class="muted">net</span></td>
+              <td class="calc__amt" id="o-merchant">—</td>
+              <td>residual — the provider's take-home, after its BPP</td>
+            </tr>
+            <tr>
+              <td><span class="calc__dot calc__dot--bpp"></span>Provider app · BPP</td>
+              <td class="calc__amt" id="o-bpp">—</td>
+              <td><span id="o-bpprate">—</span> of price — the PN's cut, an off-wire deal</td>
+            </tr>
+            <tr>
+              <td><span class="calc__dot calc__dot--finder"></span>Buyer app · BAP</td>
+              <td class="calc__amt" id="o-finder">—</td>
+              <td>finder fee · <span id="o-finderrate">—</span> — <code>buyerFinderFeeAmount</code></td>
+            </tr>
+            <tr>
+              <td><span class="calc__dot calc__dot--qris"></span>QRIS acquirer</td>
+              <td class="calc__amt" id="o-qris">—</td>
+              <td><span id="o-rate">—</span> MDR · <code>borneBy: SELLER</code></td>
+            </tr>
+            <tr>
+              <td><span class="calc__dot calc__dot--ion"></span>ION network</td>
+              <td class="calc__amt" id="o-ion">—</td>
+              <td>flat network fee — funds the Fabric, <em>not</em> a commission</td>
+            </tr>
+            <tr id="o-pph-row">
+              <td><span class="calc__dot calc__dot--pph"></span>State · PPh final</td>
+              <td class="calc__amt" id="o-pph">—</td>
+              <td>0.5% of revenue — the non-PKP seller's income tax</td>
+            </tr>
+            <tr class="calc__table-total">
+              <td><strong>Product price</strong></td>
+              <td class="calc__amt" id="o-product">—</td>
+              <td>the pool that is split</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="note__tag">Reading it</span>
+        <p>
+          The courier and the state are not in this split — they were paid in
+          the quote. What is left, the product price, goes mostly to the
+          <strong>merchant</strong>; its <strong>provider app (BPP)</strong>,
+          the <strong>buyer app</strong>, the <strong>QRIS acquirer</strong> and
+          <strong>ION</strong> take the rest. The <strong>merchant + BPP</strong>
+          rows together are what actually lands at the Provider Node
+          (<code>netPayableToReceiver</code>) — the network pays the PN, which
+          keeps its cut and passes the balance to the merchant. Switch the seller
+          to <strong>UMI</strong> on an order ≤ 500,000 and the QRIS slice drops
+          to <strong>0</strong>; raise the BPP cut and watch it eat into the
+          merchant's net.
+        </p>
+      </div>
+
+      <div class="note">
+        <span class="note__tag">A fee, not a commission</span>
+        <p>
+          ION's slice is a <strong>flat network fee</strong> — a fixed rupiah
+          amount per order that pays for the Fabric (registry, gateway,
+          cataloging) and the team that runs it. It is <em>not</em> a
+          <strong>commission</strong>: it does not grow with the order's value,
+          so it is a rounding error on a large sale and never a percentage tax on
+          the seller's GMV. That is the whole point of the model — the network
+          funds itself the way a stock exchange charges a flat trade fee, not the
+          way a marketplace takes a cut. (ONDC runs the same way: a flat ₹1.5 per
+          transaction.)
+        </p>
+      </div>
+
+      <div class="note">
+        <span class="note__tag">On a bad day</span>
+        <p>
+          If the seller <em>breaks a service promise</em> — ships late, sends the
+          wrong item — an <code>slaPenaltyDeduction</code> also comes out of its
+          net. The calculator assumes a clean order, so it is <strong>0</strong>
+          here.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="qris">
+    <div class="page">
+      <div class="head">
+        <span class="num">03</span>
+        <span class="tag">What QRIS actually costs the seller</span>
+      </div>
+      <h2>The QRIS fee is <span class="ital">not flat.</span></h2>
+      <p class="standfirst">
+        Bank Indonesia sets it by the <strong>merchant's category</strong>, and
+        for the smallest sellers it also depends on the <strong>ticket
+        size</strong>. It is the <em>seller's</em> classification that decides the
+        rate, not the price of the item.
+      </p>
+
+      <table class="ref-table">
+        <thead>
+          <tr><th>Seller category</th><th>Txn ≤ 500,000</th><th>Txn &gt; 500,000</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Micro</strong><br><span class="muted">UMI · warung, kaki lima</span></td><td><strong>0%</strong></td><td>0.3%</td></tr>
+          <tr><td><strong>Small · Medium · Large</strong><br><span class="muted">UKE · UME · UBE</span></td><td>0.7%</td><td>0.7%</td></tr>
+          <tr><td><strong>Public service</strong><br><span class="muted">G2P, taxes, donations</span></td><td>0%</td><td>0%</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <span class="note__tag">Reading the table</span>
+        <p>
+          The 0% is <em>not</em> "any item under 500,000 is free." It applies only
+          to a <strong>micro (UMI)</strong> seller, and only up to 500,000 — above
+          that they pay 0.3%. A <strong>regular shop or enterprise pays 0.7% on
+          every sale</strong>, whatever the amount; the 500,000 line does not exist
+          for them. So the same IDR 300,000 item is free through a UMI warung but
+          costs 2,100 through a big retailer. Rates effective 15 March 2025, set by
+          Bank Indonesia — and by BI rule the merchant always bears the QRIS MDR;
+          it cannot be passed to the buyer.
+        </p>
+      </div>
+
+      <div class="note">
+        <span class="note__tag">Who even charges PPN</span>
+        <p>
+          Not every seller. PPN is collected only by a <strong>PKP</strong>
+          (<em>Pengusaha Kena Pajak</em>, VAT-registered) — and you become PKP only
+          once annual turnover passes <strong>Rp 4.8 billion</strong>. Below that, a
+          seller is <strong>non-PKP</strong> and charges <strong>no PPN</strong>: a
+          UMI warung's quote has no VAT line at all. Such sellers aren't tax-free
+          though — they owe <strong>PPh Final 0.5%</strong> of revenue (PP 23/2018),
+          which comes out of <em>their</em> take, not the buyer's quote. Flip the
+          <strong>VAT status</strong> control to see both. (Note: PKP status and the
+          QRIS category above are separate classifications — a seller can be small on
+          one and not the other.)
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="keeps">
+    <div class="page">
+      <div class="head">
+        <span class="num">04</span>
+        <span class="tag">Who keeps what — and for what</span>
+      </div>
+      <h2>Five shares, <span class="ital">each for a job.</span></h2>
+      <p class="standfirst">
+        Seven parties touch the money; five take a share of the <em>product
+        price</em>, each for a distinct job.
+      </p>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">SPLIT</span>
+          <span class="name">The product price</span>
+          <span class="why">five claims on one pool</span>
+        </div>
+        <div class="plug-grid">
+          <div class="p">
+            <div class="nm">Merchant</div>
+            <div class="dn">Provided the goods — and keeps the bulk.</div>
+          </div>
+          <div class="p">
+            <div class="nm">Provider app · BPP / PN</div>
+            <div class="dn">Listed and served the catalog — its cut, an off-wire deal struck with the merchant.</div>
+          </div>
+          <div class="p">
+            <div class="nm">Buyer app · BAP</div>
+            <div class="dn">Brought the customer — its finder fee, ~5%.</div>
+          </div>
+          <div class="p">
+            <div class="nm">QRIS acquirer</div>
+            <div class="dn">Moved the money — the MDR, 0–0.7% by category.</div>
+          </div>
+          <div class="p">
+            <div class="nm">ION network</div>
+            <div class="dn">Ran the rails — a flat network fee that funds the Fabric, not a cut of the sale.</div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        The rest is not anyone's revenue: the <strong>courier</strong> is paid the
+        delivery line, and the <strong>state</strong> is paid the tax —
+        <strong>PPN</strong> in the buyer's quote if the seller is PKP, or a
+        <strong>0.5% PPh final</strong> out of the merchant's net if it isn't. The
+        full settlement anatomy is worked end-to-end in the
+        <a href="/transaction-with-payment/">trade × payment × logistics</a> example.
+      </p>
+    </div>
+  </section>
+
+
+  <footer class="foot">
+    <div class="page">
+      <div class="big">
+        Delivery and tax pass straight through — what the network splits is just
+        <span class="rust ital">the product price the merchant set to cover every cut.</span>
+      </div>
+      <div class="row">
+        <div>compiled · ion-network · who-gets-paid</div>
+      </div>
+      <div class="apindo-credit">
+        <a class="apindo-mark" href="https://apindo.or.id" target="_blank" rel="noopener" aria-label="APINDO">
+          <img src="/apindo-logo.png" alt="" width="68" height="68" />
+        </a>
+        <div class="apindo-text">
+          <span class="apindo-label">maintained by</span>
+          <a class="apindo-name" href="https://apindo.or.id" target="_blank" rel="noopener">APINDO</a>
+          <span class="apindo-full">Asosiasi Pengusaha Indonesia</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</BaseLayout>
+
+<style>
+  /* ===== CALLOUT / NOTE ===== */
+  .note {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: start;
+    margin: 24px 0;
+    max-width: 680px;
+    padding: 18px 22px;
+    background: var(--paper-deep);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--rust);
+  }
+  .note__tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--rust);
+    padding-top: 4px;
+    white-space: nowrap;
+  }
+  .note p {
+    margin: 0;
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  /* ===== REFERENCE & QRIS TABLES ===== */
+  .ref-table,
+  .calc__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0 4px;
+    font-family: "Newsreader", serif;
+    font-size: 15px;
+  }
+  .ref-table th,
+  .calc__table th {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .ref-table td,
+  .calc__table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+    vertical-align: top;
+  }
+  .ref-table strong,
+  .calc__table strong { color: var(--ink); }
+  .ref-table th:not(:first-child),
+  .ref-table td:not(:first-child) { text-align: right; white-space: nowrap; }
+
+  .muted {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ===== INTERACTIVE CALCULATOR ===== */
+  .calc {
+    border: 1px solid var(--line);
+    background: var(--paper-deep);
+    padding: 24px;
+    margin: 30px 0;
+    max-width: 760px;
+  }
+  .calc__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  .calc__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 150px;
+  }
+  .calc__field > span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--rust);
+  }
+  .calc__field select,
+  .calc__field input {
+    font-family: "Newsreader", serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 9px 11px;
+    width: 100%;
+  }
+  .calc__field select:focus,
+  .calc__field input:focus { outline: none; border-color: var(--rust); }
+
+  /* quote receipt */
+  .calc__quote {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 6px 16px;
+    margin-bottom: 24px;
+  }
+  .calc__qrow {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    color: var(--ink-soft);
+  }
+  .calc__qrow i { color: var(--muted); font-style: normal; }
+  .calc__qrow b { color: var(--ink); font-weight: 500; }
+  .calc__qrow--total {
+    border-top: 1px solid var(--line);
+    margin-top: 2px;
+    color: var(--rust);
+  }
+  .calc__qrow--total b { color: var(--rust); font-weight: 700; }
+
+  .calc__lbl {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin: 0 0 10px;
+  }
+  .calc__cap {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted);
+    margin: 12px 0 0;
+    max-width: 760px;
+  }
+  .calc__amt {
+    font-family: "JetBrains Mono", monospace;
+    text-align: right;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .calc__table { margin-top: 22px; }
+  .calc__table code {
+    font-size: 11px;
+  }
+  .calc__table-total td {
+    border-top: 1px solid var(--ink);
+    border-bottom: none;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .calc__dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* ===== PAYOUT BAR ===== */
+  .paybar { margin: 0 0 4px; padding: 0; }
+  .paybar__track {
+    display: flex;
+    height: 52px;
+    overflow: hidden;
+    border: 1px solid var(--ink);
+  }
+  .paybar__seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--paper);
+    white-space: nowrap;
+    transition: width 0.25s ease;
+  }
+  .paybar__seg span { padding: 0 4px; }
+
+  /* segment + dot colors share the paper palette */
+  .paybar__seg--merchant,
+  .calc__dot--merchant { background: var(--amber); }
+  .paybar__seg--bpp,
+  .calc__dot--bpp      { background: var(--teal); }
+  .paybar__seg--finder,
+  .calc__dot--finder   { background: var(--moss); }
+  .paybar__seg--qris,
+  .calc__dot--qris     { background: var(--muted); }
+  .paybar__seg--ion,
+  .calc__dot--ion      { background: var(--rust); }
+  .paybar__seg--pph,
+  .calc__dot--pph      { background: #9a8e74; }
+
+  @media (max-width: 700px) {
+    .note { grid-template-columns: 1fr; gap: 8px; }
+  }
+</style>
+
+<script>
+  const fmt = (n) => Math.round(n).toLocaleString('en-US');
+  const pct = (r) => (r * 100).toFixed(2).replace(/\.?0+$/, '') + '%';
+  const mdr = (cat, amt) => {
+    if (cat === 'reg') return 0.007;
+    if (cat === 'pub') return 0;
+    return amt <= 500000 ? 0 : 0.003; // umi
+  };
+
+  const PPN = 0.11, PPH = 0.005;
+  const el = (id) => document.getElementById(id);
+  const cat = el('c-cat'), vat = el('c-vat'), prod = el('c-product'), deliv = el('c-deliv'), bppEl = el('c-bpp'), finderEl = el('c-finder'), ionFeeEl = el('c-ion');
+  const bar = el('c-bar'), cap = el('c-cap');
+
+  function recalc() {
+    const isPkp = vat.value === 'pkp';
+    const product = Math.max(0, Number(prod.value) || 0);
+    const delivery = Math.max(0, Number(deliv.value) || 0);
+    const ionFee = Math.max(0, Number(ionFeeEl.value) || 0);
+    const bppRate = Math.min(1, Math.max(0, (Number(bppEl.value) || 0) / 100));
+    const finderRate = Math.min(1, Math.max(0, (Number(finderEl.value) || 0) / 100));
+
+    // PKP sellers charge PPN to the buyer (added to the quote); non-PKP charge none
+    // but owe PPh final 0.5% on revenue (taken out of their own net).
+    const ppn = isPkp ? product * PPN : 0;
+    const pph = isPkp ? 0 : product * PPH;
+    const total = product + delivery + ppn;
+
+    const rate = mdr(cat.value, product);
+    const qris = product * rate;
+    const finder = product * finderRate;
+    const ion = Math.min(ionFee, product);
+    const bpp = product * bppRate;
+    // netPayableToReceiver lands at the PN/BPP; the BPP keeps its cut, the merchant gets the rest.
+    const merchant = Math.max(0, product - finder - qris - ion - bpp - pph);
+
+    // quote
+    el('q-product').textContent = fmt(product);
+    el('q-deliv').textContent = fmt(delivery);
+    el('q-ppn').textContent = fmt(ppn);
+    el('q-total').textContent = fmt(total);
+    el('q-ppn-row').style.display = isPkp ? '' : 'none';
+
+    // distribution table
+    el('o-merchant').textContent = fmt(merchant);
+    el('o-bpp').textContent = fmt(bpp);
+    el('o-bpprate').textContent = pct(bppRate);
+    el('o-finder').textContent = fmt(finder);
+    el('o-finderrate').textContent = pct(finderRate);
+    el('o-qris').textContent = fmt(qris);
+    el('o-ion').textContent = fmt(ion);
+    el('o-pph').textContent = fmt(pph);
+    el('o-product').textContent = fmt(product);
+    el('o-rate').textContent = pct(rate);
+    el('o-pph-row').style.display = isPkp ? 'none' : '';
+
+    // bar (shares of the product price)
+    const segs = { merchant, bpp, finder, qris, ion, pph };
+    bar.querySelectorAll('.paybar__seg').forEach((s) => {
+      const v = segs[s.dataset.seg] || 0;
+      const w = product > 0 ? (v / product) * 100 : 0;
+      s.style.width = w + '%';
+      s.querySelector('span').textContent = w >= 8 ? fmt(v) : '';
+    });
+
+    const sPct = product > 0 ? (merchant / product) * 100 : 0;
+    const taxBit = isPkp ? `PPN ${fmt(ppn)} to buyer` : `PPh final ${fmt(pph)}`;
+    cap.textContent = `Merchant keeps ${sPct.toFixed(1)}% of the product price · BPP ${pct(bppRate)} · buyer paid IDR ${fmt(total)} · QRIS ${pct(rate)} · ${taxBit}`;
+  }
+
+  [cat, vat, prod, deliv, bppEl, finderEl, ionFeeEl].forEach((e) => e.addEventListener('input', recalc));
+  recalc();
+</script>
