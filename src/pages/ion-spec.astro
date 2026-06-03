@@ -1,0 +1,748 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { lastUpdated } from '../lib/last-updated.js';
+import { docs } from '../lib/docs.js';
+const updated = lastUpdated('public/ion-full.yaml');
+const here = '/ion-spec/';
+
+const title = "Reading ion-full.yaml — The ION Specification · ION Network";
+const description = "A guided reading of ion-full.yaml: the single-file OpenAPI 3.1.1 specification that extends Beckn Protocol v2.0 into the Indonesia Open Network — its four layers, eight new endpoints, attribute packs, and the regulatory rules ONIX enforces.";
+
+// ── L4: ION core attribute packs (cross-sector) ──────────────────────────
+const corePacks = [
+  { nm: 'IONParticipant', dn: 'Who is acting — role, subscriberId, NPWP/NIB/NIK, KTP, bank & insurer licences, plus the full Indonesian address hierarchy.', slot: 'Participant.participantAttributes' },
+  { nm: 'IONBusinessIdentity', dn: 'A provider’s legal proof — NPWP, NIB (OSS), PKP status, legal entity type (PT/CV/UD/Koperasi…).', slot: 'Provider.providerAttributes' },
+  { nm: 'PaymentDeclaration', dn: 'The authoritative payment rail per transaction — method, collectedBy, timing, gateway, and a oneOf of instrument detail.', slot: 'Settlement.settlementAttributes' },
+  { nm: 'IONReconciliation', dn: 'Settlement basis, withholding, and the signed adjustment ledger (penalties, rebates, COD remittance).', slot: 'Settlement.settlementAttributes' },
+  { nm: 'IONTaxDetail', dn: 'Tax regime (PPN / PPnBM / PPh), category (BKP/JKP), rate, and the eFaktur reference.', slot: 'Consideration (nested)' },
+  { nm: 'IONAddressSubdivisions', dn: 'BPS province→kelurahan codes, RT/RW, landmark (patokan), 3T remote classification, last-mile accessibility flags.', slot: 'address / location detail' },
+  { nm: 'IONProductCertifications', dn: 'Halal (MUI), BPOM registration, SNI, SP-PIRT food licence, age restrictions.', slot: 'product attributes' },
+  { nm: 'IONRating', dn: 'Verified-purchase reviews — 1–5 scale, dimension sub-categories, media, seller response.', slot: 'RatingInput.target.targetAttributes' },
+  { nm: 'IONSupportTicket', dn: 'Consumer complaint triage — category, severity, SLA clocks, escalation ladder.', slot: 'Support.channels[*]' },
+  { nm: 'IONTicket', dn: 'Network-level dispute object carried in the /raise body — type, thread, resolution, penalty.', slot: '/raise message body' },
+  { nm: 'IONCatalogLocalization', dn: 'Multilingual catalog text keyed by language (id / en / ms / zh …).', slot: 'catalog / item attributes' },
+];
+
+// ── L5: sector attribute packs ───────────────────────────────────────────
+const tradePacks = ['TradeProvider', 'TradeOffer', 'TradeResource', 'TradeCommitment', 'TradeConsideration', 'TradeContract', 'TradePerformance'];
+const logiPacks = ['LogisticsProvider', 'LogisticsOffer', 'LogisticsShipment', 'LogisticsCommitment', 'LogisticsConsideration', 'LogisticsContract', 'LogisticsPerformance', 'LogisticsTracking', 'LogisticsParticipantAddendum'];
+
+// ── x-ion-conditional-rules: the five cross-schema rules ──────────────────
+const rules = [
+  { when: 'participant.role = DRIVER', then: 'driverLicenceCategory', on: 'LogisticsParticipantAddendum', why: 'a courier must declare which SIM class authorises their vehicle.' },
+  { when: 'participant.role = DRIVER', then: 'driverLicenceNumber', on: 'LogisticsParticipantAddendum', why: 'identifies the human carrying the parcel (roro, freight, hyperlocal).' },
+  { when: 'participant.role = CUSTOMS_BROKER', then: 'ppjkLicenceNumber', on: 'LogisticsParticipantAddendum', why: 'cross-border clearance requires a registered PPJK.' },
+  { when: 'payment.paymentRail = COD', then: 'codAmount', on: 'TradeContract', why: 'cash-on-delivery must state the sum the courier collects.' },
+  { when: 'identity.pkpStatus = PKP', then: 'fakturPajakReference', on: 'TradeContract', why: 'a PKP seller issuing a TAX_INVOICE owes a tax-invoice number.' },
+];
+---
+
+<BaseLayout title={title} description={description}>
+  <header class="sitehead">
+  <nav class="top">
+    <div class="inner">
+      <div class="brand">reading <span class="dot">●</span> ion-full.yaml</div>
+      <div class="links">
+        {docs.map((d) => <a href={d.href} class={d.href === here ? 'here' : undefined}>{d.label}</a>)}
+      </div>
+    </div>
+  </nav>
+
+  <nav class="docbar">
+    <div class="inner">
+      <span class="lbl">On this page</span>
+      <div class="docs">
+        <a href="#orient"><span class="n">01</span>what it is</a>
+        <a href="#layers"><span class="n">02</span>four layers</a>
+        <a href="#contract"><span class="n">03</span>the contract</a>
+        <a href="#profile"><span class="n">04</span>L2 · profile</a>
+        <a href="#endpoints"><span class="n">05</span>L3 · verbs</a>
+        <a href="#packs"><span class="n">06</span>L4/L5 · packs</a>
+        <a href="#rules"><span class="n">07</span>rules</a>
+        <a href="#indonesia"><span class="n">08</span>indonesia</a>
+      </div>
+    </div>
+  </nav>
+  </header>
+
+  <header class="hero">
+    <div class="page">
+      <svg class="deco" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M20 0H0V20" fill="none" stroke="#c6bba0" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="380" height="380" fill="url(#grid)"/>
+        <circle cx="190" cy="190" r="150" fill="none" stroke="#234951" stroke-width="0.6"/>
+        <circle cx="190" cy="190" r="110" fill="none" stroke="#161513" stroke-width="0.6"/>
+        <circle cx="190" cy="190" r="70"  fill="none" stroke="#c63d1a" stroke-width="0.8"/>
+        <circle cx="190" cy="190" r="30"  fill="none" stroke="#161513" stroke-width="0.6"/>
+        <circle cx="190" cy="190" r="3"   fill="#c63d1a"/>
+        <line x1="0" y1="190" x2="380" y2="190" stroke="#161513" stroke-width="0.4" stroke-dasharray="2 4"/>
+        <line x1="190" y1="0" x2="190" y2="380" stroke="#161513" stroke-width="0.4" stroke-dasharray="2 4"/>
+        <text x="200" y="58" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">ion.id / v0.6.0</text>
+      </svg>
+
+      <div class="kicker smallcaps">A guided reading · OpenAPI 3.1.1 · extends Beckn v2.0</div>
+      <h1>
+        One file,<br/>
+        <span class="acc ital">a whole</span> <span class="ital">network.</span>
+      </h1>
+      <p class="lede">
+        <code>ion-full.yaml</code> is the single-file specification of the
+        <em>Indonesia Open Network</em>. It does not fork Beckn — it
+        <em>extends</em> it: every Beckn type is referenced, never copied, and
+        everything ION adds mounts onto a named Beckn slot. This is a tour of
+        what the file declares, layer by layer, and <em>why each piece exists</em>.
+      </p>
+
+      <div class="meta">
+        <div class="item">
+          <div class="v">3.1.1</div>
+          <div class="l smallcaps">OpenAPI dialect</div>
+        </div>
+        <div class="item">
+          <div class="v">0.6.0</div>
+          <div class="l smallcaps">Profile · draft</div>
+        </div>
+        <div class="item">
+          <div class="v">8</div>
+          <div class="l smallcaps">New endpoints</div>
+        </div>
+        <div class="item">
+          <div class="v">L2–L5</div>
+          <div class="l smallcaps">Spec layers</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <section id="orient">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">01</span>
+        <span class="tag">What it is</span>
+      </div>
+      <h2>An <span class="ital">extension</span>, not a fork.</h2>
+      <p class="standfirst">
+        ION is a national commerce network for Indonesia built on the Beckn
+        protocol. <code>ion-full.yaml</code> is the contract every participant
+        codes against. Its first design decision is the most important one:
+        it never embeds Beckn. It points at a local copy of
+        <code>beckn.yaml</code> and adds only what Indonesia needs on top.
+      </p>
+
+      <figure>
+        <div class="frame">
+          <svg viewBox="0 0 1000 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two-file model: ion.yaml references beckn.yaml without copying it">
+            <defs>
+              <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#c63d1a"/>
+              </marker>
+            </defs>
+
+            <rect x="60" y="70" width="340" height="200" fill="#f1ead8" stroke="#c63d1a" stroke-width="1.4"/>
+            <rect x="60" y="70" width="340" height="24" fill="#c63d1a"/>
+            <text x="76" y="87" font-family="JetBrains Mono" font-size="11" fill="#f1ead8" letter-spacing="2">ion.yaml · THIS FILE</text>
+            <text x="76" y="130" font-family="Fraunces" font-style="italic" font-size="24" fill="#161513">the extension</text>
+            <g font-family="JetBrains Mono" font-size="11" fill="#234951">
+              <text x="76" y="165">L2 · x-ion-profile</text>
+              <text x="76" y="188">L3 · 8 endpoints (/raise · /reconcile)</text>
+              <text x="76" y="211">L4 · core attribute packs</text>
+              <text x="76" y="234">L5 · sector attribute packs</text>
+            </g>
+            <text x="76" y="258" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">version 0.6.0-draft</text>
+
+            <rect x="600" y="70" width="340" height="200" fill="none" stroke="#161513" stroke-width="1.2"/>
+            <rect x="600" y="70" width="340" height="24" fill="#161513"/>
+            <text x="616" y="87" font-family="JetBrains Mono" font-size="11" fill="#f1ead8" letter-spacing="2">beckn.yaml · UPSTREAM</text>
+            <text x="616" y="130" font-family="Fraunces" font-style="italic" font-size="24" fill="#161513">core v2.0.0</text>
+            <g font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">
+              <text x="616" y="165">30 core endpoints</text>
+              <text x="616" y="188">Context · Attributes · base objects</text>
+              <text x="616" y="211">transport &amp; signing model</text>
+            </g>
+            <text x="616" y="246" font-family="JetBrains Mono" font-size="9" fill="#c63d1a">untouched · swap to upgrade</text>
+
+            <line x1="400" y1="150" x2="598" y2="150" stroke="#c63d1a" stroke-width="1.5" marker-end="url(#arrR)"/>
+            <text x="500" y="138" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#c63d1a">$ref: beckn.yaml#/…</text>
+            <text x="500" y="172" text-anchor="middle" font-family="Newsreader" font-style="italic" font-size="13" fill="#7a6f5e">reference, never copy</text>
+
+            <text x="60" y="40" font-family="Fraunces" font-style="italic" font-size="16" fill="#161513">fig.01</text>
+            <text x="60" y="58" font-family="JetBrains Mono" font-size="10" fill="#7a6f5e">two files, run together, merged never</text>
+          </svg>
+        </div>
+        <figcaption>
+          <span class="fig">fig. 01</span>
+          <span class="cap">Run the two files together through any OpenAPI 3.1.1 validator. When Beckn ships a new version, only beckn.yaml changes — ion.yaml is untouched.</span>
+        </figcaption>
+      </figure>
+
+      <p>
+        The payoff of this discipline is upgrade safety. Beckn evolves on its own
+        clock; Indonesia's regulatory surface evolves on another. Keeping them in
+        two files means a Beckn point-release never forces an ION rewrite — and an
+        ION policy change never touches the shared protocol core.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="layers">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">02</span>
+        <span class="tag">Four layers</span>
+      </div>
+      <h2>Read it <span class="ital">top to bottom.</span></h2>
+      <p class="standfirst">
+        The file is organised as a stack. Each layer answers a different question,
+        and each builds on the one beneath it. Beckn core is L1 — the ground the
+        whole thing stands on, living in the other file.
+      </p>
+
+      <figure>
+        <div class="frame">
+          <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The ION specification layer stack from L1 Beckn core up to L5 sector packs">
+            <defs>
+              <linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#f1ead8"/>
+                <stop offset="1" stop-color="#e8dec5"/>
+              </linearGradient>
+            </defs>
+
+            <rect x="60" y="40" width="780" height="64" fill="url(#lg2)" stroke="#234951" stroke-width="0.8"/>
+            <text x="76" y="62" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="2">L5 · SECTOR ATTRIBUTE PACKS</text>
+            <text x="76" y="88" font-family="Fraunces" font-style="italic" font-size="19" fill="#161513">trade · logistics · hospitality</text>
+            <text x="520" y="80" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">fields only one industry needs</text>
+
+            <rect x="60" y="116" width="780" height="64" fill="url(#lg2)" stroke="#234951" stroke-width="0.8"/>
+            <text x="76" y="138" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="2">L4 · CORE ATTRIBUTE PACKS</text>
+            <text x="76" y="164" font-family="Fraunces" font-style="italic" font-size="19" fill="#161513">identity · payment · tax · address · rating …</text>
+            <text x="520" y="156" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">cross-sector Indonesian fields</text>
+
+            <rect x="60" y="192" width="780" height="64" fill="url(#lg2)" stroke="#234951" stroke-width="0.8"/>
+            <text x="76" y="214" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="2">L3 · PROTOCOL ENDPOINT EXTENSIONS</text>
+            <text x="76" y="240" font-family="Fraunces" font-style="italic" font-size="19" fill="#161513">/raise family + /reconcile</text>
+            <text x="520" y="232" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">8 verbs Beckn doesn’t define</text>
+
+            <rect x="60" y="268" width="780" height="64" fill="url(#lg2)" stroke="#234951" stroke-width="0.8"/>
+            <text x="76" y="290" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="2">L2 · NETWORK PROFILE</text>
+            <text x="76" y="316" font-family="Fraunces" font-style="italic" font-size="19" fill="#161513">x-ion-profile</text>
+            <text x="520" y="308" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">signing · rails · compliance · conformance</text>
+
+            <rect x="60" y="344" width="780" height="56" fill="#161513"/>
+            <text x="76" y="366" font-family="JetBrains Mono" font-size="10" fill="#e6b8a8" letter-spacing="2">L1 · BECKN CORE v2.0.0</text>
+            <text x="76" y="389" font-family="Fraunces" font-style="italic" font-size="18" fill="#f1ead8">beckn.yaml — the shared protocol</text>
+            <text x="520" y="380" font-family="JetBrains Mono" font-size="11" fill="#7a6f5e">referenced, in the other file</text>
+
+            <line x1="40" y1="392" x2="40" y2="60" stroke="#c63d1a" stroke-width="1" stroke-dasharray="2 3"/>
+            <polygon points="40,60 36,67 44,67" fill="#c63d1a"/>
+            <text x="50" y="230" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" transform="rotate(-90 50 230)" letter-spacing="2">ION BUILDS UPWARD</text>
+          </svg>
+        </div>
+        <figcaption>
+          <span class="fig">fig. 02</span>
+          <span class="cap">L1 is Beckn, in the other file. Everything above it — L2 through L5 — is what ion-full.yaml contributes.</span>
+        </figcaption>
+      </figure>
+
+      <div class="matrix">
+        <div class="cell">
+          <div class="role">L2 · profile</div>
+          <div class="id">x-ion-profile</div>
+          <div class="desc">Network-wide settings: the signing algorithm, payment rails, tax rules, conformance matrix, and policy registry that bind every Indonesian participant.</div>
+          <div class="ex"><span>where</span> one block near the top</div>
+        </div>
+        <div class="cell">
+          <div class="role">L3 · endpoints</div>
+          <div class="id">paths:</div>
+          <div class="desc">Eight new HTTP verbs — the /raise dispute family and /reconcile settlement pair — that sit alongside the Beckn action endpoints.</div>
+          <div class="ex"><span>where</span> the paths block</div>
+        </div>
+        <div class="cell">
+          <div class="role">L4 · core packs</div>
+          <div class="id">~11 schemas</div>
+          <div class="desc">Cross-sector attribute packs — identity, payment, tax, address, rating, support — that any transaction in any sector may carry.</div>
+          <div class="ex"><span>where</span> components/schemas</div>
+        </div>
+        <div class="cell">
+          <div class="role">L5 · sector packs</div>
+          <div class="id">~16 schemas</div>
+          <div class="desc">Trade (7) and logistics (9) packs — plus a hospitality delivery pack — for fields only that industry needs.</div>
+          <div class="ex"><span>where</span> components/schemas</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section id="contract">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">03</span>
+        <span class="tag">The contract</span>
+      </div>
+      <h2>How a pack <span class="ital">mounts.</span></h2>
+
+      <div class="with-marginalia">
+        <div class="body">
+
+          <p class="standfirst">
+            ION never invents a new top-level object. Instead, every extension
+            schema declares two things — <em>where</em> it attaches in Beckn, and
+            that it <em>inherits</em> Beckn's base. Those two lines are the entire
+            extension mechanism.
+          </p>
+
+          <p>
+            Beckn objects each expose an open <code>*Attributes</code> slot — a
+            deliberate hole left for networks to fill. ION fills those holes. Every
+            L4/L5 schema carries an <code>x-beckn-attaches-to</code> annotation
+            naming its target slot, and <code>allOf</code>'s with Beckn's
+            <code>Attributes</code> base so it inherits the required
+            <code>@context</code> / <code>@type</code> machinery.
+          </p>
+
+          <pre><span class="c"># an ION pack, in components/schemas</span>
+IONBusinessIdentity:
+  <span class="k">x-beckn-attaches-to</span>: Provider.providerAttributes
+  <span class="k">allOf</span>:
+    - $ref: <span class="s">beckn.yaml#/components/schemas/Attributes</span>
+    - type: object
+      properties:
+        npwp:   <span class="c"># 16-digit tax ID</span>
+        nib:    <span class="c"># OSS business number</span>
+        pkpStatus: <span class="c"># PKP | NON_PKP</span></pre>
+
+          <p>
+            This is what makes ION a <span class="ital">non-forking</span>
+            extension. A BPP's provider object is still a Beckn provider — it just
+            carries an <code>IONBusinessIdentity</code> in its attributes bag. Any
+            Beckn-aware tool that doesn't understand ION simply ignores the extra
+            fields; any ION-aware validator reads them.
+          </p>
+
+          <p>
+            Most packs also carry an <code>x-jsonld</code> block (<code>@context</code>,
+            <code>@type: ion:…</code>). The spec is OpenAPI-authoritative today,
+            with a declared transition path toward JSON-LD as the semantic source
+            of truth — the vocabulary already lives under
+            <code>schema.ion.id</code>.
+          </p>
+
+        </div>
+
+        <aside>
+          <div class="label">the two annotations</div>
+          <span class="path">x-beckn-attaches-to</span>
+          <span class="path">allOf → Attributes</span>
+          <span class="path">x-jsonld (@type ion:)</span>
+          <span class="path">x-ion-regulatory</span>
+          <span class="path">x-ion-conditional</span>
+        </aside>
+      </div>
+
+    </div>
+  </section>
+
+
+  <section id="profile">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">04</span>
+        <span class="tag">L2 · the profile</span>
+      </div>
+      <h2>The rules of <span class="ital">the network.</span></h2>
+      <p class="standfirst">
+        <code>x-ion-profile</code> is one big block that every participant must
+        honour. It sets the cryptography, the currency and timezone, the tax
+        regime, the settlement rails, and the conformance matrix. These aren't
+        per-message fields — they are the constants of the network itself.
+      </p>
+
+      <div class="matrix">
+        <div class="cell">
+          <div class="role">x-ion-security</div>
+          <div class="id">ed25519 · BLAKE2b-512</div>
+          <div class="desc">Signatures are mandatory and use Ed25519; the body digest is BLAKE2b-512, carried on the wire as <code>BLAKE-512=…</code>. Clock-skew tolerance is 30 seconds.</div>
+          <div class="ex"><span>enforces</span> message authenticity</div>
+        </div>
+        <div class="cell">
+          <div class="role">x-ion-localization</div>
+          <div class="id">ID · IDR · Asia/Jakarta</div>
+          <div class="desc">Country Indonesia, default currency IDR, default language <code>id</code> (English supported), timezone Asia/Jakarta.</div>
+          <div class="ex"><span>enforces</span> money &amp; time defaults</div>
+        </div>
+        <div class="cell">
+          <div class="role">x-ion-compliance</div>
+          <div class="id">PPN 11% · NPWP · NIB · PKP</div>
+          <div class="desc">Standard tax is PPN at 11% (luxury via PPnBM). Providers must carry NPWP and NIB; PKP status is required. Data residency is ID.</div>
+          <div class="ex"><span>enforces</span> who may sell &amp; how taxed</div>
+        </div>
+        <div class="cell">
+          <div class="role">x-ion-settlement</div>
+          <div class="id">AFTER_DELIVERY · ≤48h</div>
+          <div class="desc">Default settlement is after delivery, within a 48-hour window. Funds may be collected by the BAP, BPP, or LSP.</div>
+          <div class="ex"><span>enforces</span> when money moves</div>
+        </div>
+        <div class="cell">
+          <div class="role">x-ion-conformance</div>
+          <div class="id">schema-pack matrix</div>
+          <div class="desc">The exact pack versions a participant must implement, per sector — core, trade, logistics, hospitality — pinned to Beckn core 2.0.0.</div>
+          <div class="ex"><span>enforces</span> what you must support</div>
+        </div>
+        <div class="cell">
+          <div class="role">x-ion-policy-registry</div>
+          <div class="id">16 policy categories</div>
+          <div class="desc">Returns, cancellation, warranty, dispute, SLA, penalty, insurance… Offers cite policy IRIs; ION Central resolves &amp; enforces them at every boundary.</div>
+          <div class="ex"><span>enforces</span> the fine print</div>
+        </div>
+      </div>
+
+      <p>The settlement rails the profile permits:</p>
+      <div class="chips">
+        <span class="chip rust">BI_FAST</span>
+        <span class="chip rust">QRIS</span>
+        <span class="chip rust">VIRTUAL_ACCOUNT</span>
+        <span class="chip rust">COD</span>
+        <span class="chip rust">EWALLET</span>
+        <span class="chip rust">BANK_TRANSFER</span>
+        <span class="chip rust">BNPL</span>
+      </div>
+
+      <p>
+        The profile also names the active sectors — <strong>trade, logistics, and
+        hospitality</strong> — with <em>mobility, finance, and tourism</em> reserved
+        for later. And it carries an experimental <code>x-ion-context-extensions</code>
+        block: a transaction may declare its <code>pattern</code> (e.g.
+        <code>parcel</code>, <code>storefront</code>) and a snapshot of policy IRIs,
+        so ION Central can enforce the exact terms agreed at contract time even if
+        the registry later changes.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="endpoints">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">05</span>
+        <span class="tag">L3 · the new verbs</span>
+      </div>
+      <h2>Eight verbs Beckn <span class="ital">doesn't have.</span></h2>
+      <p class="standfirst">
+        The <code>paths</code> block declares the familiar Beckn action/callback
+        pairs — <code>/select</code>, <code>/init</code>, <code>/confirm</code>,
+        <code>/status</code> … — and then adds eight endpoints that are pure ION.
+        They cover the two things a commerce network needs after the deal is
+        struck: <em>resolving disputes</em> and <em>settling money</em>.
+      </p>
+
+      <p>
+        Every endpoint follows the Beckn idiom — the caller POSTs a signed
+        request and immediately receives a synchronous <code>Ack</code>; the real
+        answer arrives later on the matching <code>/on_…</code> callback. In the
+        summaries the spec writes <strong>CN</strong> for the consumer-side
+        participant (the BAP) and <strong>PN</strong> for the provider-side one
+        (the BPP).
+      </p>
+
+      <h3>The /raise family — dispute escalation</h3>
+      <p>
+        When two parties can't settle a problem bilaterally through
+        <code>/update</code> within the policy SLA, either side <em>raises</em> it
+        to the ION network for adjudication. The dispute itself travels as an
+        <code>IONTicket</code> object.
+      </p>
+
+      <div class="matrix">
+        <div class="cell">
+          <div class="role">raise → on_raise</div>
+          <div class="id">open the dispute</div>
+          <div class="desc">A BAP or BPP submits a commercial dispute; the gateway returns a ticket ID and an expected resolution timeline.</div>
+          <div class="ex"><span>body</span> RaiseAction · OnRaiseAction</div>
+        </div>
+        <div class="cell">
+          <div class="role">raise_status → on_raise_status</div>
+          <div class="id">poll the dispute</div>
+          <div class="desc">Query a ticket by ID; the callback returns its current status and stage in the resolution process.</div>
+          <div class="ex"><span>body</span> RaiseStatusAction · …</div>
+        </div>
+        <div class="cell">
+          <div class="role">raise_details → on_raise_details</div>
+          <div class="id">read the thread</div>
+          <div class="desc">Request the full dispute thread; the callback returns every message and piece of evidence on the ticket.</div>
+          <div class="ex"><span>body</span> RaiseDetailsAction · …</div>
+        </div>
+        <div class="cell">
+          <div class="role">why it exists</div>
+          <div class="id">bilateral → network</div>
+          <div class="desc">Beckn handles the happy path. ION adds the unhappy path: a neutral, auditable escalation lane when the two parties are stuck.</div>
+          <div class="ex"><span>actor</span> BAP or BPP → gateway</div>
+        </div>
+      </div>
+
+      <h3>The /reconcile pair — financial settlement</h3>
+      <p>
+        After a contract reaches <code>COMPLETE</code>, the BAP initiates
+        reconciliation of the final settlement amount — with every adjustment
+        folded in: weight disputes, SLA rebates, COD remittance, FWA rebates, tax.
+        The BPP answers <code>AGREED</code>, <code>DISPUTED</code>, or
+        <code>PENDING_ADJUSTMENT</code>.
+      </p>
+
+      <div class="matrix">
+        <div class="cell">
+          <div class="role">reconcile</div>
+          <div class="id">propose the net amount</div>
+          <div class="desc">BAP sends the final figure with all adjustments. Supports <code>context.try=true</code> — a dry-run preview that doesn't commit the settlement state.</div>
+          <div class="ex"><span>body</span> ReconcileAction</div>
+        </div>
+        <div class="cell">
+          <div class="role">on_reconcile</div>
+          <div class="id">agree or dispute</div>
+          <div class="desc">BPP returns the verdict and net amount. <code>AGREED</code> moves Settlement DRAFT → COMMITTED; <code>DISPUTED</code> keeps it DRAFT, pending exchange or a /raise.</div>
+          <div class="ex"><span>body</span> OnReconcileAction</div>
+        </div>
+      </div>
+
+      <p>
+        Notice the seam between the two families: <code>/reconcile</code> handles
+        the money when both sides ultimately agree; <code>/raise</code> is the
+        escape hatch when they don't. A disputed reconciliation can become a raised
+        ticket — the two extension families are designed to hand off to each other.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="packs">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">06</span>
+        <span class="tag">L4 / L5 · the packs</span>
+      </div>
+      <h2>The vocabulary, <span class="ital">in packs.</span></h2>
+      <p class="standfirst">
+        Below the endpoints sit the schemas — the nouns of the network. They
+        divide cleanly: <strong>L4 core packs</strong> hold the Indonesian fields
+        any sector might use, and <strong>L5 sector packs</strong> hold the fields
+        that belong to one industry alone. Each pack names the Beckn slot it
+        mounts onto.
+      </p>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">L4</span>
+          <span class="name">Core attribute packs</span>
+          <span class="why">cross-sector · used everywhere</span>
+        </div>
+        <div class="plug-grid">
+          {corePacks.map((p) => (
+            <div class="p">
+              <div class="nm">{p.nm}</div>
+              <div class="dn">{p.dn}</div>
+              <div class="dn" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--rust);margin-top:8px;">▸ {p.slot}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">L5</span>
+          <span class="name">Trade pack</span>
+          <span class="why">retail, B2B, procurement</span>
+        </div>
+        <div class="chips">
+          {tradePacks.map((s) => <span class="chip">{s}</span>)}
+        </div>
+      </div>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">L5</span>
+          <span class="name">Logistics pack</span>
+          <span class="why">parcel, freight, hyperlocal, roro</span>
+        </div>
+        <div class="chips">
+          {logiPacks.map((s) => <span class="chip">{s}</span>)}
+        </div>
+        <p>
+          The logistics packs carry the operational reality of moving goods —
+          airway bills, booking references, pickup models, applied cut-offs — plus
+          the <code>LogisticsParticipantAddendum</code>, which is where a driver's
+          SIM licence and a customs broker's PPJK number live.
+        </p>
+      </div>
+
+      <div class="plug-cat">
+        <div class="cat-head">
+          <span class="badge">L5</span>
+          <span class="name">Hospitality pack</span>
+          <span class="why">restaurant ordering</span>
+        </div>
+        <p>
+          The newest active sector ships a <code>delivery</code> pack and reuses
+          the trade packs for offer, provider, commitment, consideration, contract,
+          and performance — full 7-pack coverage for restaurant ordering.
+        </p>
+      </div>
+
+      <p>
+        The mounting pattern is uniform: a <code>TradeContract</code> rides in
+        <code>Contract.contractAttributes</code>, a <code>LogisticsTracking</code>
+        in <code>Tracking.trackingAttributes</code>, a <code>PaymentDeclaration</code>
+        in <code>Settlement.settlementAttributes</code>. Learn the slot names once
+        and the whole schema layer reads predictably.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="rules">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">07</span>
+        <span class="tag">Cross-schema rules</span>
+      </div>
+      <h2>Five rules <span class="ital">JSON Schema can't say.</span></h2>
+      <p class="standfirst">
+        Some requirements span two schemas: a field becomes mandatory only because
+        of a value set in a <em>different</em> attribute bag. Standard JSON Schema
+        <code>if/then</code> can't reach across bags composed at runtime, so ION
+        declares these in <code>x-ion-conditional-rules</code> — and ONIX, the
+        network validator, enforces them at every boundary.
+      </p>
+
+      <div class="matrix">
+        {rules.map((r) => (
+          <div class="cell">
+            <div class="role">when {r.when}</div>
+            <div class="id">require {r.then}</div>
+            <div class="desc">{r.why}</div>
+            <div class="ex"><span>on</span> {r.on}</div>
+          </div>
+        ))}
+        <div class="cell">
+          <div class="role">enforced by</div>
+          <div class="id">ONIX · at the edge</div>
+          <div class="desc">These run at every API boundary, not inside the schema — the validator is the network's gatekeeper, so the rules live with it.</div>
+          <div class="ex"><span>version</span> rules 1.0.0</div>
+        </div>
+      </div>
+
+      <p>
+        Read top to bottom they tell a story about Indonesian commerce: a courier
+        must prove their licence class, a customs broker their PPJK, a
+        cash-on-delivery order must name the cash, and a tax-registered seller must
+        carry a Faktur Pajak number. The protocol encodes the regulation.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="indonesia">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">08</span>
+        <span class="tag">Indonesia, encoded</span>
+      </div>
+      <h2>Why it could only be <span class="ital">here.</span></h2>
+      <p class="standfirst">
+        Strip away the Beckn scaffolding and what remains is unmistakably
+        Indonesian. The specificity is the point — these are the fields a national
+        network needs to be lawful, deliverable, and payable across an archipelago.
+      </p>
+
+      <div class="deploys">
+        <div class="d">
+          <div class="head"><span class="name">Identity</span><span class="tag">who</span></div>
+          <div class="sub">Regulatory proofs baked into participant &amp; provider objects, each tied to a specific statute.</div>
+          <div class="mods">
+            <span class="m">NPWP</span><span class="m">NIB</span><span class="m">NIK / KTP</span><span class="m">PKP status</span><span class="m">SIM class</span><span class="m">PPJK</span>
+          </div>
+        </div>
+        <div class="d">
+          <div class="head"><span class="name">Address</span><span class="tag">where</span></div>
+          <div class="sub">A formal hierarchy for a place where street numbering often fails — plus last-mile reality.</div>
+          <div class="mods">
+            <span class="m">BPS codes</span><span class="m">RT / RW</span><span class="m">patokan</span><span class="m">3T remote</span><span class="m">kelurahan</span>
+          </div>
+        </div>
+        <div class="d">
+          <div class="head"><span class="name">Money</span><span class="tag">how</span></div>
+          <div class="sub">The full spread of Indonesian rails and tax, with eFaktur for the tax-registered.</div>
+          <div class="mods">
+            <span class="m">QRIS</span><span class="m">BI-FAST</span><span class="m">Virtual Acct</span><span class="m">COD</span><span class="m">BNPL</span><span class="m">PPN / PPnBM</span>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        And on the goods themselves: <code>IONProductCertifications</code> carries
+        <strong>Halal</strong> status (MUI), <strong>BPOM</strong> registration for
+        food and cosmetics, <strong>SNI</strong> conformance, the SP-PIRT home-food
+        licence, and age restrictions. Each field in the spec is annotated with the
+        regulation it answers to — <code>x-ion-regulatory</code> turns a schema into
+        a citation.
+      </p>
+
+      <p>
+        That is the whole of <code>ion-full.yaml</code>: a thin, upgrade-safe
+        extension on top of Beckn, an L2 profile that fixes the network's
+        constants, eight endpoints for disputes and settlement, and a library of
+        attribute packs that encode Indonesian law, geography, and money into the
+        protocol itself.
+      </p>
+
+    </div>
+  </section>
+
+
+  <footer class="foot">
+    <div class="page">
+      <div class="foot-updated smallcaps">Last updated · {updated}</div>
+      <div class="apindo-credit">
+        <a class="apindo-mark" href="https://apindo.or.id" target="_blank" rel="noopener" aria-label="APINDO">
+          <img src="/apindo-logo.png" alt="" width="68" height="68" />
+        </a>
+        <div class="apindo-text">
+          <span class="apindo-label">maintained by</span>
+          <a class="apindo-name" href="https://apindo.or.id" target="_blank" rel="noopener">APINDO</a>
+          <span class="apindo-full">Asosiasi Pengusaha Indonesia</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script is:inline>
+    (function () {
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+        });
+      }, { rootMargin: "0px 0px -60px 0px", threshold: 0.05 });
+
+      document.querySelectorAll("section, figure, header.hero .lede, header.hero .meta")
+        .forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
+    })();
+  </script>
+</BaseLayout>
