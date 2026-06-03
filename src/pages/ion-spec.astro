@@ -35,6 +35,51 @@ const rules = [
   { when: 'payment.paymentRail = COD', then: 'codAmount', on: 'TradeContract', why: 'cash-on-delivery must state the sum the courier collects.' },
   { when: 'identity.pkpStatus = PKP', then: 'fakturPajakReference', on: 'TradeContract', why: 'a PKP seller issuing a TAX_INVOICE owes a tax-invoice number.' },
 ];
+
+// ── L5 trade pack — the seven schemas, grouped by transaction phase ───────
+const tradePhases = [
+  {
+    badge: 'CATALOG', title: 'On the shelf', tone: 'teal',
+    why: 'before anyone buys',
+    blurb: 'Three packs describe what is for sale and on what terms — the seller, the product, and the deal. They are set by the BPP at publish time and read by buyers during discovery.',
+    packs: [
+      { name: 'TradeProvider', slot: 'Provider.providerAttributes', role: 'The seller’s storefront — is it open, what does it sell, is it KYC-cleared?', fields: ['providerCategory', 'storeStatus', 'invoicingModel', 'kycLevel', 'operatingHours', 'trustedSellerBadge'] },
+      { name: 'TradeResource', slot: 'Resource.resourceAttributes', role: 'The product itself — its shape, variants, customisations and certifications.', fields: ['resourceStructure', 'resourceTangibility', 'variantMatrix', 'customisationGroups', 'itemRating', 'regulatory'] },
+      { name: 'TradeOffer', slot: 'Offer.offerAttributes', role: 'The price and the binding policy bundle attached to it.', fields: ['offerType', 'priceModel', 'returnPolicy', 'warrantyPolicy', 'availableOnCod', 'isFlashSale'] },
+    ],
+  },
+  {
+    badge: 'ORDER', title: 'At the counter', tone: 'rust',
+    why: 'select → init → confirm',
+    blurb: 'Three packs turn a basket into a binding agreement — what was chosen, what it costs, and the order itself. They are written as the BAP and BPP negotiate the quote and lock the contract.',
+    packs: [
+      { name: 'TradeCommitment', slot: 'Commitment.commitmentAttributes', role: 'One line of the order — this resource, this offer, this quantity, at a price locked at on_select.', fields: ['lineId', 'resourceId', 'offerId', 'quantity', 'customisationSelections', 'specialInstructions'] },
+      { name: 'TradeConsideration', slot: 'Consideration.considerationAttributes', role: 'The money, line by line — items, tax, delivery, discounts, fees.', fields: ['breakupLineType', 'ppnRate', 'ppnbmRate', 'discountType', 'totalAmount'] },
+      { name: 'TradeContract', slot: 'Contract.contractAttributes', role: 'The agreed order — invoice intent, COD amount, subscription terms, gifting, quote history.', fields: ['invoicePreferences', 'fakturPajakReference', 'codAmount', 'subscriptionBillingCycle', 'quoteTrail', 'disputeWindowDays'] },
+    ],
+  },
+  {
+    badge: 'FULFIL', title: 'On the road', tone: 'ink',
+    why: 'after confirm',
+    blurb: 'One pack tracks the goods from dispatch to doorstep — the mode of fulfilment, the courier, live tracking, and the proof that it arrived.',
+    packs: [
+      { name: 'TradePerformance', slot: 'Performance.performanceAttributes', role: 'Fulfilment in motion — mode, courier identity, tracking handle, proof of delivery, SLA, age checks.', fields: ['performanceMode', 'sla', 'awbNumber', 'deliveryOtp', 'realTimeGps', 'ageVerificationRequired'] },
+    ],
+  },
+];
+
+// A sample TradeConsideration breakup, for the receipt figure. Amounts in IDR;
+// PROVIDER_BENEFIT is a seller-funded discount, hence negative.
+const breakup = [
+  { type: 'ITEM', amount: 89000, sign: 1 },
+  { type: 'DELIVERY', amount: 12000, sign: 1 },
+  { type: 'TAX · PPN 11%', amount: 9790, sign: 1 },
+  { type: 'PROVIDER_BENEFIT', amount: 10000, sign: -1 },
+  { type: 'COD_FEE', amount: 2500, sign: 1 },
+];
+const breakupTotal = breakup.reduce((t, b) => t + b.sign * b.amount, 0);
+const idr = (n) => 'Rp ' + n.toLocaleString('id-ID');
+const barScale = 600 / breakupTotal; // total bar fills the track
 ---
 
 <BaseLayout title={title} description={description}>
@@ -58,8 +103,9 @@ const rules = [
         <a href="#profile"><span class="n">04</span>L2 · profile</a>
         <a href="#endpoints"><span class="n">05</span>L3 · verbs</a>
         <a href="#packs"><span class="n">06</span>L4/L5 · packs</a>
-        <a href="#rules"><span class="n">07</span>rules</a>
-        <a href="#indonesia"><span class="n">08</span>indonesia</a>
+        <a href="#trade"><span class="n">07</span>trade pack</a>
+        <a href="#rules"><span class="n">08</span>rules</a>
+        <a href="#indonesia"><span class="n">09</span>indonesia</a>
       </div>
     </div>
   </nav>
@@ -570,6 +616,7 @@ IONBusinessIdentity:
         <div class="chips">
           {tradePacks.map((s) => <span class="chip">{s}</span>)}
         </div>
+        <p>Seven schemas — one per stage of a sale. <a href="#trade">§07 takes them apart, up close ↓</a></p>
       </div>
 
       <div class="plug-cat">
@@ -614,11 +661,178 @@ IONBusinessIdentity:
   </section>
 
 
-  <section id="rules">
+  <section id="trade">
     <div class="page">
 
       <div class="head">
         <span class="num">07</span>
+        <span class="tag">The trade pack, up close</span>
+      </div>
+      <h2>Seven schemas, <span class="ital">one sale.</span></h2>
+      <p class="standfirst">
+        The trade pack is the L5 layer for buying and selling goods — retail,
+        B2B procurement, restaurant ordering. It is not one schema but
+        <strong>seven</strong>, and they line up exactly with the Beckn objects a
+        transaction passes through on its way from catalog to doorstep. Read them
+        in order and you read the life of an order.
+      </p>
+
+      <figure>
+        <div class="frame">
+          <svg viewBox="0 0 1120 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The seven trade-pack schemas arranged along the transaction lifecycle from catalog to fulfilment">
+            <defs>
+              <marker id="chev" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" fill="#7a6f5e"/>
+              </marker>
+            </defs>
+
+            <!-- phase bands -->
+            <rect x="20"  y="74" width="459" height="26" fill="none" stroke="#234951" stroke-width="0.8"/>
+            <text x="249" y="91" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#234951" letter-spacing="3">CATALOG · published by BPP</text>
+            <rect x="491" y="74" width="459" height="26" fill="none" stroke="#c63d1a" stroke-width="0.8"/>
+            <text x="720" y="91" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#c63d1a" letter-spacing="3">ORDER · select → confirm</text>
+            <rect x="962" y="74" width="145" height="26" fill="none" stroke="#161513" stroke-width="0.8"/>
+            <text x="1034" y="91" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#161513" letter-spacing="2">FULFIL</text>
+
+            <!-- 7 stations -->
+            <g font-family="JetBrains Mono" font-size="8.5" fill="#f1ead8">
+              <!-- box generator: x = 20 + i*157, width 145 -->
+              <g><rect x="20"  y="130" width="145" height="150" fill="#f1ead8" stroke="#234951" stroke-width="1"/><rect x="20"  y="130" width="145" height="24" fill="#234951"/><text x="92"  y="146" text-anchor="middle" letter-spacing="1">PROVIDER</text></g>
+              <g><rect x="177" y="130" width="145" height="150" fill="#f1ead8" stroke="#234951" stroke-width="1"/><rect x="177" y="130" width="145" height="24" fill="#234951"/><text x="249" y="146" text-anchor="middle" letter-spacing="1">RESOURCE</text></g>
+              <g><rect x="334" y="130" width="145" height="150" fill="#f1ead8" stroke="#234951" stroke-width="1"/><rect x="334" y="130" width="145" height="24" fill="#234951"/><text x="406" y="146" text-anchor="middle" letter-spacing="1">OFFER</text></g>
+              <g><rect x="491" y="130" width="145" height="150" fill="#f1ead8" stroke="#c63d1a" stroke-width="1"/><rect x="491" y="130" width="145" height="24" fill="#c63d1a"/><text x="563" y="146" text-anchor="middle" letter-spacing="1">COMMITMENT</text></g>
+              <g><rect x="648" y="130" width="145" height="150" fill="#f1ead8" stroke="#c63d1a" stroke-width="1"/><rect x="648" y="130" width="145" height="24" fill="#c63d1a"/><text x="720" y="146" text-anchor="middle" letter-spacing="0">CONSIDERATION</text></g>
+              <g><rect x="805" y="130" width="145" height="150" fill="#f1ead8" stroke="#c63d1a" stroke-width="1"/><rect x="805" y="130" width="145" height="24" fill="#c63d1a"/><text x="877" y="146" text-anchor="middle" letter-spacing="1">CONTRACT</text></g>
+              <g><rect x="962" y="130" width="145" height="150" fill="#f1ead8" stroke="#161513" stroke-width="1"/><rect x="962" y="130" width="145" height="24" fill="#161513"/><text x="1034" y="146" text-anchor="middle" letter-spacing="0">PERFORMANCE</text></g>
+            </g>
+
+            <!-- role phrase (Fraunces italic) -->
+            <g font-family="Fraunces" font-style="italic" font-size="21" fill="#161513" text-anchor="middle">
+              <text x="92"   y="205">the seller</text>
+              <text x="249"  y="205">the product</text>
+              <text x="406"  y="205">the deal</text>
+              <text x="563"  y="205">the line</text>
+              <text x="720"  y="205">the bill</text>
+              <text x="877"  y="205">the order</text>
+              <text x="1034" y="205">delivery</text>
+            </g>
+
+            <!-- schema name + when set -->
+            <g font-family="JetBrains Mono" font-size="9.5" text-anchor="middle">
+              <text x="92"   y="240" fill="#7a6f5e">TradeProvider</text>
+              <text x="249"  y="240" fill="#7a6f5e">TradeResource</text>
+              <text x="406"  y="240" fill="#7a6f5e">TradeOffer</text>
+              <text x="563"  y="240" fill="#7a6f5e">TradeCommitment</text>
+              <text x="720"  y="240" fill="#7a6f5e">TradeConsideration</text>
+              <text x="877"  y="240" fill="#7a6f5e">TradeContract</text>
+              <text x="1034" y="240" fill="#7a6f5e">TradePerformance</text>
+            </g>
+            <g font-family="JetBrains Mono" font-size="8" text-anchor="middle" fill="#c63d1a">
+              <text x="92"   y="262">·providerAttributes</text>
+              <text x="249"  y="262">·resourceAttributes</text>
+              <text x="406"  y="262">·offerAttributes</text>
+              <text x="563"  y="262">·commitmentAttributes</text>
+              <text x="720"  y="262">·considerationAttributes</text>
+              <text x="877"  y="262">·contractAttributes</text>
+              <text x="1034" y="262">·performanceAttributes</text>
+            </g>
+
+            <!-- flow line -->
+            <line x1="20" y1="305" x2="1107" y2="305" stroke="#7a6f5e" stroke-width="1" marker-end="url(#chev)"/>
+            <text x="20" y="330" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">discover</text>
+            <text x="563" y="330" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">negotiate &amp; lock the quote</text>
+            <text x="1107" y="330" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#7a6f5e">to the door</text>
+
+            <text x="20" y="40" font-family="Fraunces" font-style="italic" font-size="16" fill="#161513">fig.03</text>
+            <text x="20" y="58" font-family="JetBrains Mono" font-size="10" fill="#7a6f5e">the trade pack, mapped onto the Beckn object model</text>
+          </svg>
+        </div>
+        <figcaption>
+          <span class="fig">fig. 03</span>
+          <span class="cap">Each trade schema mounts on the matching Beckn object’s attributes slot. Catalog packs are written by the seller up front; order packs are written as the deal is struck; the performance pack is written during fulfilment.</span>
+        </figcaption>
+      </figure>
+
+      {tradePhases.map((ph) => (
+        <div class="plug-cat">
+          <div class="cat-head">
+            <span class="badge">{ph.badge}</span>
+            <span class="name">{ph.title}</span>
+            <span class="why">{ph.why}</span>
+          </div>
+          <p>{ph.blurb}</p>
+          <div class="plug-grid">
+            {ph.packs.map((p) => (
+              <div class="p">
+                <div class="nm">{p.name}</div>
+                <div class="dn" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--rust);margin-top:4px;">▸ {p.slot}</div>
+                <div class="dn">{p.role}</div>
+                <div class="chips" style="margin:10px 0 0;">
+                  {p.fields.map((f) => <span class="chip">{f}</span>)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <h3>A consideration, broken up</h3>
+      <p>
+        Of the seven, <code>TradeConsideration</code> is where the money lives —
+        and it is more interesting than a single total. Every charge, tax, discount
+        and fee is its own line, tagged with a <code>breakupLineType</code> drawn
+        from a fixed vocabulary of nearly thirty values. That is what lets ION
+        Central audit a bill line by line — and lets a refund or a reconciliation
+        target one line without unpicking the rest.
+      </p>
+
+      <figure>
+        <div class="frame">
+          <svg viewBox="0 0 900 410" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A sample TradeConsideration price breakup as a bar chart by breakupLineType">
+            <text x="20" y="34" font-family="Fraunces" font-style="italic" font-size="18" fill="#161513">one basket, six lines</text>
+            <text x="20" y="54" font-family="JetBrains Mono" font-size="9.5" fill="#7a6f5e">each row is a breakupLineType · charges in rust, seller-funded benefit in teal</text>
+
+            {breakup.map((b, i) => (
+              <g font-family="JetBrains Mono" font-size="11">
+                <text x="210" y={92 + i * 46} text-anchor="end" fill="#161513">{b.type}</text>
+                <rect x="222" y={78 + i * 46} width={Math.max(2, Math.round(b.amount * barScale))} height="22" fill={b.sign < 0 ? '#234951' : '#c63d1a'}/>
+                <text x={230 + Math.round(b.amount * barScale)} y={93 + i * 46} fill={b.sign < 0 ? '#234951' : '#161513'}>{(b.sign < 0 ? '−' : '+') + ' ' + idr(b.amount)}</text>
+              </g>
+            ))}
+
+            <line x1="222" y1={78 + breakup.length * 46} x2="822" y2={78 + breakup.length * 46} stroke="#c6bba0" stroke-width="1" stroke-dasharray="3 3"/>
+
+            <g font-family="JetBrains Mono" font-size="11">
+              <text x="210" y={92 + (breakup.length + 0.4) * 46} text-anchor="end" font-weight="600" fill="#161513">NET PAYABLE</text>
+              <rect x="222" y={78 + (breakup.length + 0.4) * 46} width="600" height="24" fill="#161513"/>
+              <text x="810" y={95 + (breakup.length + 0.4) * 46} text-anchor="end" font-size="13" font-weight="600" fill="#f1ead8">{idr(breakupTotal)}</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption>
+          <span class="fig">fig. 04</span>
+          <span class="cap">A worked TradeConsideration. <code>ppnRate</code> on the TAX line carries the 11% PPN; PROVIDER_BENEFIT is a seller-funded discount; COD_FEE is the cash-on-delivery surcharge. The net is the sum of the signed lines.</span>
+        </figcaption>
+      </figure>
+
+      <p>
+        And notice where the network’s rules bite: two of the five cross-schema
+        rules from the next section live in <code>TradeContract</code> —
+        <code>codAmount</code> becomes mandatory when the payment rail is COD, and
+        <code>fakturPajakReference</code> when a PKP seller issues a tax invoice.
+        The trade pack doesn’t just describe a sale; it carries the hooks the
+        validator pulls on.
+      </p>
+
+    </div>
+  </section>
+
+
+  <section id="rules">
+    <div class="page">
+
+      <div class="head">
+        <span class="num">08</span>
         <span class="tag">Cross-schema rules</span>
       </div>
       <h2>Five rules <span class="ital">JSON Schema can't say.</span></h2>
@@ -662,7 +876,7 @@ IONBusinessIdentity:
     <div class="page">
 
       <div class="head">
-        <span class="num">08</span>
+        <span class="num">09</span>
         <span class="tag">Indonesia, encoded</span>
       </div>
       <h2>Why it could only be <span class="ital">here.</span></h2>
