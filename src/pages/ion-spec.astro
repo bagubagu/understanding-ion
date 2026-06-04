@@ -449,8 +449,8 @@ IONBusinessIdentity:
         <div class="cell">
           <div class="role">x-ion-security</div>
           <div class="id">ed25519 · BLAKE2b-512</div>
-          <div class="desc">Signatures are mandatory and use Ed25519; the body digest is BLAKE2b-512, carried on the wire as <code>BLAKE-512=…</code>. Clock-skew tolerance is 30 seconds.</div>
-          <div class="ex"><span>enforces</span> message authenticity</div>
+          <div class="desc">Signatures are mandatory (Ed25519). The body digest is hashed with <strong>BLAKE2b-512</strong> but written and verified on the wire as the literal token <code>BLAKE-512=…</code> — the <code>algorithm</code> and <code>wireToken</code> differ by design. This matches what the ONIX signer/validator actually signs (<code>blake2b.New512</code> + <code>digest: BLAKE-512=</code>), which is the network's source of truth. 30s clock-skew tolerance.</div>
+          <div class="ex"><span>per</span> beckn-onix signer / signvalidator</div>
         </div>
         <div class="cell">
           <div class="role">x-ion-localization</div>
